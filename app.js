@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v13.0 - KURŞUN GEÇİRMEZ)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v15.0 - SOLID START)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -67,7 +67,7 @@ let selectedCell = null;
 
 // Verileri Yükle
 async function loadBackupData() {
-    if(localPuzzles.length > 0) return;
+    if(localPuzzles.length > 0) return true;
     try {
         const res = await fetch('tum_bulmacalar_SIRALI.json');
         if (res.ok) {
@@ -80,8 +80,13 @@ async function loadBackupData() {
             if(data.tier_4) hardPuzzles = hardPuzzles.concat(data.tier_4);
             if(data.tier_5) hardPuzzles = hardPuzzles.concat(data.tier_5);
             console.log("Veriler yüklendi.");
+            return true;
         }
-    } catch (e) { console.log("JSON Yedeği yüklenemedi, manuel yedeğe geçilecek."); }
+    } catch (e) { 
+        console.warn("JSON Yedeği yüklenemedi."); 
+        return false;
+    }
+    return false;
 }
 // Arka planda başlat
 loadBackupData();
@@ -110,36 +115,34 @@ window.startTournamentGame = async function() {
         return;
     }
 
-    // 3. Veri Kontrolü (Yoksa bekle, gelmezse yedeğe geç)
+    // 3. Veri Kontrolü (Yoksa bekle)
     if (localPuzzles.length === 0) {
         console.log("Veri bekleniyor...");
         await loadBackupData();
     }
 
-    // 4. Bulmacayı BELİRLE (Garanti)
+    // 4. Bulmacayı Seç
     let puzzleData = null;
-    
     if (localPuzzles.length > 0) {
-        // Normal Havuzdan
         let idx = (userProgress.level - 1) % localPuzzles.length;
         puzzleData = localPuzzles[idx];
-    } 
-    
-    // Eğer hala veri yoksa (Fetch başarısızsa) KESİN YEDEK KULLAN
-    if (!puzzleData) {
-        console.log("⚠️ Veri havuzu boş, Acil Durum Bulmacası devreye giriyor.");
+    } else {
+        // Veri kesinlikle yoksa YEDEK kullan
         puzzleData = getBackupPuzzle();
     }
 
     // 5. Tahtayı Kurmayı Dene
-    const setupSuccess = setupBoard(puzzleData);
+    const isBoardSetup = setupBoard(puzzleData);
 
-    // 6. SADECE Tahta Kurulduysa Oyunu Başlat
-    if (setupSuccess) {
+    // 6. KRİTİK: Sadece Tahta Kurulduysa Başlat
+    if (isBoardSetup) {
         closeOverlays();
-        userProgress.dailyQuota--; // Kotayı şimdi düş
+        
+        // Kotayı SADECE burada düşüyoruz
+        userProgress.dailyQuota--; 
         saveProgress();
         updateUI();
+        
         currentGame.mode = 'tournament';
         resumeGame(); // Sayacı başlat
     } else {
@@ -163,14 +166,11 @@ window.startDailyGame = async function() {
         for (let i = 0; i < dateString.length; i++) hash = ((hash << 5) - hash) + dateString.charCodeAt(i) | 0;
         const uniqueIndex = Math.abs(hash) % hardPuzzles.length;
         puzzleData = hardPuzzles[uniqueIndex];
+    } else {
+        puzzleData = getBackupPuzzle();
     }
     
-    // Günlük için de yedek kontrolü
-    if (!puzzleData) puzzleData = getBackupPuzzle();
-
-    const setupSuccess = setupBoard(puzzleData);
-
-    if (setupSuccess) {
+    if (setupBoard(puzzleData)) {
         currentGame.mode = 'daily';
         currentGame.isPlaying = false; // Hemen başlatma
         if(currentGame.timerInterval) clearInterval(currentGame.timerInterval);
@@ -191,14 +191,14 @@ function resumeGame() {
     startTimer();
 }
 
-// 5'li Yedek Paketi (Kodun İçine Gömülü - İNTERNETSİZ BİLE ÇALIŞIR)
+// 5'li Yedek Paketi (Tier 5 - INSANE)
 function getBackupPuzzle() {
     const backups = [
-        { puzzle: "1572394684837569129628145..6954873212.1.6.8.48...216....9.782.6726.4.189.1869274.", solution: "157239468483756912962814537695487321231965874874321695349178256726543189518692743" },
-        { puzzle: "7256..43.9847.32656..54287.5..267984247...15.8964517231.2..469..79126548468975.12", solution: "725689431984713265613542879531267984247398156896451723152834697379126548468975312" },
-        { puzzle: "9..3.415.6135..84.4.518.93.861945273392..8514.4723168915....32873981246528..53791", solution: "928374156613529847475186932861945273392768514547231689154697328739812465286453791" },
-        { puzzle: "871.2965324.86.9.16931754829.6248.17...691.2.1245378.6...9..2.551238476946.752138", solution: "871429653245863971693175482936248517758691324124537896387916245512384769469752138" },
-        { puzzle: "613948527459217.38728563419....7....867329145....8..7.576431..23428.6751981752364", solution: "613948527459217638728563419194675283867329145235184976576431892342896751981752364" }
+        { puzzle: ".4..............3.......97....7...4.....8........2....52.816.9.739245186816......", solution: "348697512297158634165432978952761843471583269683924751524816397739245186816379425" },
+        { puzzle: ".....52..........45......7..5......7..75......4.6....54.81....3315..8746...453...", solution: "136745289729816354584329671251934867967581432843672195498167523315298746672453918" },
+        { puzzle: "...2.96.53.7......2.6...1...3.784...76.95..4.94....5....36.57.8..................", solution: "814239675357816429296547183135784296762953841948162537423695718571328964689471352" },
+        { puzzle: "6....5..9....21........4....5...........47.....4......816453297....8.1.6492..6...", solution: "621735489549821673378964512257318964963547821184692735816453297735289146492176358" },
+        { puzzle: "6...4..1....9..27.....7..3691.7..3..54.3.....783...............2..4...6.1..8.7..3", solution: "657243819431968275829175436912786354546312798783594621374659182298431567165827943" }
     ];
     const idx = Math.floor(Math.random() * backups.length);
     return backups[idx];
@@ -209,10 +209,7 @@ function getBackupPuzzle() {
 // ------------------------------------------------------------------
 
 function setupBoard(data) {
-    if(!data || !data.puzzle) { 
-        console.error("Hata: Geçersiz bulmaca verisi!"); 
-        return false; // Başarısız oldu sinyali
-    }
+    if(!data || !data.puzzle) return false;
 
     currentGame.solution = data.solution;
     currentGame.puzzleStr = data.puzzle;
@@ -220,27 +217,27 @@ function setupBoard(data) {
     currentGame.isReady = true;
 
     const board = document.getElementById('sudoku-board');
-    if(board) {
-        board.innerHTML = ''; 
-        for (let i = 0; i < 81; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.dataset.index = i;
-            
-            const char = data.puzzle[i];
-            if (char !== '.' && char !== '0') {
-                cell.innerText = char;
-                cell.classList.add('initial');
-            } else {
-                cell.onclick = () => selectGameCell(cell);
-            }
-            board.appendChild(cell);
+    if(!board) return false;
+
+    board.innerHTML = ''; 
+    for (let i = 0; i < 81; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.index = i;
+        
+        const char = data.puzzle[i];
+        if (char !== '.' && char !== '0') {
+            cell.innerText = char;
+            cell.classList.add('initial');
+        } else {
+            cell.onclick = () => selectGameCell(cell);
         }
+        board.appendChild(cell);
     }
     
     document.querySelector('.timer-val').innerText = "05:00";
     checkGroups(); 
-    return true; // Başarılı oldu sinyali
+    return true;
 }
 
 function selectGameCell(cell) {
@@ -375,7 +372,7 @@ async function checkWin() {
     }
 }
 
-// "Force Start" (HTML'den çağrılan buton)
+// HTML'den çağrılan buton (Safe Mode)
 window.forceStartGame = function() {
     if (currentGame.mode === 'daily') {
         resumeGame();
