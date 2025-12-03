@@ -307,16 +307,24 @@
         </div>
     </div>
 
-    <script type="module" src="app.js"></script>
+<script type="module" src="app.js"></script>
     <script>
         function toggleRules() {
             const container = document.querySelector('.rules-container');
             container.classList.toggle('open');
         }
-        function forceStartGame() {
-            document.getElementById('start-overlay').style.display = 'none';
-            if (window.startTournamentGame) window.startTournamentGame();
-            else console.log("JS Yükleniyor veya Hata Oluştu...");
+        
+        // GÜNCELLENEN FONKSİYON:
+        window.forceStartGame = function() {
+            // BURADAKİ 'style.display = none' KODUNU SİLDİK!
+            // Artık perdeyi kaldırma işini tamamen app.js yapacak.
+            // Böylece oyun kurulmadan ekran açılmayacak.
+            
+            if (window.startTournamentGame) {
+                window.startTournamentGame();
+            } else {
+                console.log("Sistem yükleniyor, lütfen bekleyin...");
+            }
         }
     </script>
 </body>

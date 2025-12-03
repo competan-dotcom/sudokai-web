@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v10.0 - Disiplinli Akış)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v11.0 - SYNC FIX)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -9,7 +9,7 @@ import {
     query, orderBy, limit 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// SENİN FIREBASE AYARLARIN
+// SENİN AYARLARIN
 const firebaseConfig = {
   apiKey: "AIzaSyDrzD5FkOCsNUFeiuvzeHEjiNvFYc5B0Bo",
   authDomain: "sudokai-ac7be.firebaseapp.com",
@@ -32,9 +32,9 @@ let currentGame = {
     puzzleStr: "",
     timer: 300,
     timerInterval: null,
-    isPlaying: false, // Oyun başladı mı?
-    mode: 'tournament', // 'tournament' veya 'daily'
-    isReady: false // Tahta kuruldu ama oyuncu hazır mı?
+    isPlaying: false,
+    mode: 'tournament',
+    isReady: false
 };
 
 let userProgress = JSON.parse(localStorage.getItem('sudokai_user')) || {
@@ -65,8 +65,9 @@ if (userProgress.lastPlayedDate !== new Date().toDateString()) {
 
 let selectedCell = null;
 
-// Verileri Yükle
+// Verileri Yükle (Promise döndürür)
 async function loadBackupData() {
+    if(localPuzzles.length > 0) return; // Zaten yüklüyse geç
     try {
         const res = await fetch('tum_bulmacalar_SIRALI.json');
         if (res.ok) {
@@ -78,61 +79,74 @@ async function loadBackupData() {
             if(data.tier_5) localPuzzles = localPuzzles.concat(data.tier_5);
             if(data.tier_4) hardPuzzles = hardPuzzles.concat(data.tier_4);
             if(data.tier_5) hardPuzzles = hardPuzzles.concat(data.tier_5);
+            console.log("Veriler yüklendi!");
         }
     } catch (e) { console.log("JSON Yedeği yüklenemedi"); }
 }
+// Arka planda başlat ama bekleme
 loadBackupData();
 
 window.onload = () => {
     updateUI();
     document.querySelector('.user-name').innerText = userProgress.username;
-    // Sayfa açılınca ASLA oyun başlatma, sadece perdeyi göster.
+    // Sayfa açılışında perde açık, oyun kapalı
     document.getElementById('start-overlay').style.display = 'flex';
     currentGame.isPlaying = false;
 };
 
 // ------------------------------------------------------------------
-// 🎮 OYUN BAŞLATMA MANTIĞI (DÜZELTİLDİ)
+// 🎮 OYUN BAŞLATMA MANTIĞI (FİXLENDİ)
 // ------------------------------------------------------------------
 
-// 1. "OYUNA BAŞLA" BUTONUNA BASINCA ÇALIŞIR
 window.startTournamentGame = async function() {
-    // Eğer oyun zaten kuruluysa ve sadece perde kalkacaksa:
-    if (currentGame.isReady && currentGame.mode === 'tournament') {
+    // 1. Oyun zaten kuruluysa ve duraklatılmışsa devam et
+    if (currentGame.isReady && currentGame.mode === 'tournament' && !currentGame.isPlaying) {
         resumeGame();
         return;
     }
 
+    // 2. Kota Kontrolü
     if (userProgress.dailyQuota <= 0) {
         alert("Günlük Turnuva kotan doldu! Yarın gel. 🛑");
         return;
     }
+
+    // 3. KRİTİK: Veri yüklü mü? Değilse bekle!
+    if (localPuzzles.length === 0) {
+        console.log("Veri bekleniyor...");
+        await loadBackupData(); // Yüklenmesini bekle
+        if (localPuzzles.length === 0) {
+            alert("Veri yüklenemedi, lütfen sayfayı yenile.");
+            return;
+        }
+    }
     
-    // Yeni oyun kuruyoruz
+    // Her şey tamsa kotayı düş ve başlat
+    closeOverlays();
     userProgress.dailyQuota--;
     saveProgress();
     updateUI();
 
     currentGame.mode = 'tournament';
     
-    // Bulmaca Seç
-    let idx = (userProgress.level - 1) % (localPuzzles.length || 1);
-    let puzzleData = localPuzzles.length > 0 ? localPuzzles[idx] : getBackupPuzzle();
+    let idx = (userProgress.level - 1) % localPuzzles.length;
+    let puzzleData = localPuzzles[idx];
 
-    setupBoard(puzzleData); // Tahtayı kur (Ama süre hemen başlamaz)
-    resumeGame(); // Şimdi başlat
+    setupBoard(puzzleData);
+    resumeGame();
 };
 
-// 2. GÜNLÜK OYUN MODU (SEÇİNCE DİREKT BAŞLAMAZ, HAZIR MISIN DER)
-window.startDailyGame = function() {
+window.startDailyGame = async function() {
     if (userProgress.hasPlayedDailyChallenge) {
         alert("Bugünlük görevi tamamladın! 🏆");
         return;
     }
 
+    // Günlük mod için de veriyi kontrol et
+    if (hardPuzzles.length === 0) await loadBackupData();
+
     currentGame.mode = 'daily';
     
-    // Günün bulmacasını seç
     const today = new Date();
     const dateString = `${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}`;
     let hash = 0;
@@ -141,22 +155,21 @@ window.startDailyGame = function() {
     const uniqueIndex = Math.abs(hash) % (hardPuzzles.length || 1);
     let puzzleData = hardPuzzles.length > 0 ? hardPuzzles[uniqueIndex] : getBackupPuzzle();
     
-    setupBoard(puzzleData); // Tahtayı kur
+    setupBoard(puzzleData);
     
-    // KRİTİK: Oyunu başlatma, perdeyi indir ve bekle.
+    // Günlük oyun hemen başlamaz, perde iner
     currentGame.isPlaying = false;
     if(currentGame.timerInterval) clearInterval(currentGame.timerInterval);
     
-    // Başlığı değiştir ki anlasın
     const startTitle = document.querySelector('#start-overlay div');
     if(startTitle) startTitle.innerText = "GÜNÜN BULMACASI";
     
     document.getElementById('start-overlay').style.display = 'flex';
-    closeOverlays(); // Diğer pencereleri kapat (varsa)
-    document.getElementById('start-overlay').style.display = 'flex'; // Emin ol
+    closeOverlays();
+    document.getElementById('start-overlay').style.display = 'flex';
 };
 
-// Oyunu ve Süreyi Başlatan Fonksiyon (Perde Kalkınca)
+// Oyunu ve Süreyi Başlatan Fonksiyon
 function resumeGame() {
     document.getElementById('start-overlay').style.display = 'none';
     closeOverlays();
@@ -179,7 +192,7 @@ function setupBoard(data) {
     currentGame.solution = data.solution;
     currentGame.puzzleStr = data.puzzle;
     currentGame.timer = 300; 
-    currentGame.isReady = true; // Tahta hazır
+    currentGame.isReady = true;
 
     const board = document.getElementById('sudoku-board');
     board.innerHTML = ''; 
@@ -199,13 +212,12 @@ function setupBoard(data) {
         board.appendChild(cell);
     }
     
-    // Tahta kuruldu ama süre başlamadı. Sadece gösteriyoruz.
     document.querySelector('.timer-val').innerText = "05:00";
     checkGroups(); 
 }
 
 function selectGameCell(cell) {
-    if (!currentGame.isPlaying) return; // Oyun başlamadıysa tıklanmaz
+    if (!currentGame.isPlaying) return;
     document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected', 'related'));
     cell.classList.add('selected');
     selectedCell = cell;
@@ -272,7 +284,7 @@ function startTimer() {
     const timerEl = document.querySelector('.timer-val');
     
     currentGame.timerInterval = setInterval(() => {
-        if(!currentGame.isPlaying) return; // Oyun durduysa sayma
+        if(!currentGame.isPlaying) return;
 
         currentGame.timer--;
         let m = Math.floor(currentGame.timer / 60).toString().padStart(2, '0');
@@ -314,12 +326,10 @@ async function checkWin() {
             document.querySelector('.win-title').innerText = "HARİKA! 🎉";
             document.querySelector('.win-text').innerText = `Puanın: ${userProgress.score}`;
             winBtn.innerText = "SONRAKİ BÖLÜM ▶";
-            // Sonraki bölüm için direkt başlatma, yine hazır mısın ekranına dön
             winBtn.onclick = () => { 
                 document.getElementById('win-overlay').style.display = 'none';
-                startTournamentGame(); // Bu fonksiyon içinde perdeyi kaldırıyorduk, orayı revize edelim:
-                // Aslında en temizi: Sonraki level kurulur, ama kullanıcı başlat der.
-                // Şimdilik akış bozulmasın diye direkt başlatıyoruz (turnuva akıcılığı için).
+                currentGame.isReady = false; // Yeni oyun için hazır değil bayrağı
+                startTournamentGame();
             };
             
         } else if (currentGame.mode === 'daily') {
@@ -339,14 +349,11 @@ async function checkWin() {
     }
 }
 
-// "Force Start" (HTML'den çağrılan buton)
-// Bu buton artık hem "İlk Başlatma" hem "Resume" görevi görüyor.
+// Force Start (HTML'den gelen)
 window.forceStartGame = function() {
-    // Eğer mod 'daily' ise ve tahta kuruluysa sadece başlat
     if (currentGame.mode === 'daily') {
         resumeGame();
     } else {
-        // Turnuva moduysa ve ilk kez basılıyorsa kurup başlat
         if(!currentGame.isReady) {
             window.startTournamentGame(); 
         } else {
@@ -358,16 +365,12 @@ window.forceStartGame = function() {
 window.returnToTournament = function() {
     document.getElementById('win-overlay').style.display = 'none';
     currentGame.mode = 'tournament';
-    currentGame.isReady = false; // Yeniden kurulsun
-    
-    // Başlığı düzelt
+    currentGame.isReady = false; 
     const startTitle = document.querySelector('#start-overlay div');
     if(startTitle) startTitle.innerText = "HAZIR MISIN?";
-    
     document.getElementById('start-overlay').style.display = 'flex';
 }
 
-// Liderlik Tablosunu Aç (Oyunu Duraklatmaz, sadece üstüne biner)
 window.openLeaderboard = async function() {
     const list = document.getElementById('global-rank-list');
     const countEl = document.getElementById('total-player-count');
@@ -414,11 +417,8 @@ window.openDailyWinners = async function() {
     } catch (e) { list.innerHTML = '<div style="text-align:center;">Henüz veri yok.</div>'; }
 };
 
-// Overlay Kapatınca (Oyun Başlamaz, Start Ekranına Dönerse Döner)
 window.closeOverlays = function() {
     document.querySelectorAll('.overlay-full').forEach(el => el.style.display = 'none');
-    
-    // Eğer oyun oynamıyorsak (Pause veya Başlangıç), Start ekranını geri aç
     if(!currentGame.isPlaying) {
         document.getElementById('start-overlay').style.display = 'flex';
     }
