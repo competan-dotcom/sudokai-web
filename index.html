@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sudokai</title>
-    
+    <title>Sudokai - Giriş</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Permanent+Marker&display=swap" rel="stylesheet">
-    
     <style>
         :root {
             --bg-gradient: linear-gradient(180deg, #f0f6ff 0%, #fff0f5 100%);
@@ -18,36 +16,23 @@
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            margin: 0; padding: 0;
-            height: 100vh;
-            background: var(--bg-gradient);
-            display: flex;
-            justify-content: center;
-            overflow: hidden;
-            color: var(--black);
+            font-family: 'Outfit', sans-serif; margin: 0; padding: 0;
+            height: 100vh; background: var(--bg-gradient);
+            display: flex; justify-content: center; overflow: hidden; color: var(--black);
         }
 
         .container {
             width: 100%; max-width: 430px; height: 100%;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center;
-            padding: 20px 30px; 
-            box-sizing: border-box;
-            gap: 30px; 
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 20px 30px; box-sizing: border-box; gap: 30px; 
         }
 
         /* --- LOGO ALANI --- */
-        .brand-area {
-            display: flex; flex-direction: column; align-items: center;
-            margin-bottom: 0;
-        }
+        .brand-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 0; }
         .grid-icon svg { width: 55px; height: 55px; overflow: visible; margin-bottom: 0px; }
         .grid-line { stroke: #000; stroke-width: 2; stroke-linecap: square; }
         .shape-fill { fill: #000; } 
         
-        /* Matrix Rakamlar */
         .ghost-num {
             font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 12px;
             text-anchor: middle; dominant-baseline: central; opacity: 0; 
@@ -59,7 +44,7 @@
         .delay-5 { animation-delay: 1s; }
         @keyframes twinkle { 0% { opacity: 0; } 20% { opacity: 1; } 40% { opacity: 0; } 100% { opacity: 0; } }
 
-        .brand-name { font-family: 'Permanent Marker', cursive; font-size: 4rem; line-height: 1.1; margin: 0; transform: rotate(0deg); color: #000; letter-spacing: 1px; }
+        .brand-name { font-family: 'Permanent Marker', cursive; font-size: 4rem; line-height: 1.1; margin: 0; color: #000; letter-spacing: 1px; }
         .brand-name span { color: var(--red); }
         
         .slogan-container { width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 10px; gap: 10px; }
@@ -68,25 +53,14 @@
 
         /* --- KART TASARIMI --- */
         .login-card {
-            background: white;
-            border-radius: 28px;
-            padding: 40px 35px;
-            text-align: center;
-            box-shadow: var(--card-shadow);
-            border: 1px solid #f1f5f9;
-            margin-bottom: 0;
+            background: white; border-radius: 28px; padding: 40px 35px;
+            text-align: center; box-shadow: var(--card-shadow); border: 1px solid #f1f5f9;
         }
 
         .card-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: var(--black);
-            margin-bottom: 25px;
-            position: relative;
-            display: inline-block;
+            font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--black);
+            margin-bottom: 25px; position: relative; display: inline-block;
         }
-        
         .card-title::after {
             content: ''; display: block; width: 60%; height: 4px;
             background: var(--red); margin: 4px auto 0 auto; border-radius: 2px; opacity: 0.9;
@@ -107,33 +81,15 @@
             color: var(--gray); font-weight: 600; line-height: 1.4;
         }
 
-        /* --- FOOTER (PANEL) --- */
+        /* --- FOOTER --- */
         .footer {
-            margin-top: 0;
-            background: rgba(255,255,255,0.6);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 12px;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            box-sizing: border-box;
-            margin-bottom: 0;
+            margin-top: 0; background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 12px 20px;
+            display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;
         }
-
-        .footer-link {
-            text-decoration: none;
-            color: var(--black);
-            font-size: 0.75rem;
-            font-weight: 700;
-            opacity: 0.8;
-            transition: all 0.2s;
-        }
-
+        .footer-link { text-decoration: none; color: var(--black); font-size: 0.75rem; font-weight: 700; opacity: 0.8; transition: all 0.2s; }
         .footer-link:hover { color: var(--red); opacity: 1; }
         .footer-link.gray-link { color: var(--gray); } 
-        
         .date-text { font-size: 0.75rem; font-weight: 700; color: var(--gray); opacity: 0.8; cursor: default; }
         .footer-group { display: flex; gap: 5px; align-items: center; }
     </style>
@@ -170,16 +126,16 @@
         <div class="login-card">
             <div class="card-title">Oyuncu Girişi</div>
             
-            <button class="google-btn">
-                <svg width="22" height="22" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.715H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.272C4.672 5.141 6.656 3.58 9 3.58z"/></svg>
-                Google ile bağlan
+            <button id="google-login-btn" class="google-btn">
+                <svg width="22" height="22" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.715H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.623.102-1.22.282-1.77L.957 4.908A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.272C4.672 5.141 6.656 3.58 9 3.58z"/></svg>
+                Google ile Bağlan
             </button>
             
-            <div class="helper">Sadece Google hesabınla oyuna giriş yapabilirsin.</div>
+            <div class="helper">Giriş yaparak puanlarını kaydedebilirsin.</div>
         </div>
 
         <div class="footer">
-            <a href="index.html" class="footer-link">AnaSayfa</a>
+            <a href="#" class="footer-link">AnaSayfa</a>
             <div class="footer-group">
                 <a href="#" class="footer-link gray-link">competanai</a>
                 <span class="date-text">@ 2026</span>
@@ -188,6 +144,67 @@
         </div>
 
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // SENİN FIREBASE AYARLARIN
+        const firebaseConfig = {
+          apiKey: "AIzaSyDrzD5FkOCsNUFeiuvzeHEjiNvFYc5B0Bo",
+          authDomain: "sudokai-ac7be.firebaseapp.com",
+          projectId: "sudokai-ac7be",
+          storageBucket: "sudokai-ac7be.firebasestorage.app",
+          messagingSenderId: "736579043328",
+          appId: "1:736579043328:web:f36aed7368da0b474218e5",
+          measurementId: "G-GWJELKTEXT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        const loginBtn = document.getElementById('google-login-btn');
+
+        // Butona tıklanınca Google girişi başlat
+        loginBtn.addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    // Giriş başarılı! Kullanıcıyı kaydet
+                    const user = result.user;
+                    
+                    // Kullanıcı bilgilerini LocalStorage'a da atalım (oyun sayfası için)
+                    let userData = JSON.parse(localStorage.getItem('sudokai_user')) || {};
+                    userData.username = user.displayName || user.email.split('@')[0];
+                    userData.email = user.email;
+                    userData.uid = user.uid; // Benzersiz ID
+                    
+                    // Eğer yeni kullanıcıysa default değerleri ata
+                    if(!userData.level) {
+                        userData.level = 1;
+                        userData.score = 0;
+                        userData.dailyQuota = 20;
+                        userData.lastPlayedDate = new Date().toDateString();
+                    }
+                    
+                    localStorage.setItem('sudokai_user', JSON.stringify(userData));
+
+                    // Oyuna yönlendir
+                    window.location.href = "game.html";
+                })
+                .catch((error) => {
+                    console.error("Giriş Hatası:", error);
+                    alert("Giriş yapılamadı: " + error.message);
+                });
+        });
+
+        // Eğer zaten giriş yapmışsa direkt yönlendir (Opsiyonel, istersen kaldırabilirsin)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // window.location.href = "game.html"; // Kullanıcıyı baymasın diye kapalı tutuyorum, butona basınca gitsin.
+            }
+        });
+    </script>
 
 </body>
 </html>
