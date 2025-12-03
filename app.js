@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v12.0 - SOLID START)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v13.0 - KURŞUN GEÇİRMEZ)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -81,7 +81,7 @@ async function loadBackupData() {
             if(data.tier_5) hardPuzzles = hardPuzzles.concat(data.tier_5);
             console.log("Veriler yüklendi.");
         }
-    } catch (e) { console.log("JSON Yedeği yüklenemedi"); }
+    } catch (e) { console.log("JSON Yedeği yüklenemedi, manuel yedeğe geçilecek."); }
 }
 // Arka planda başlat
 loadBackupData();
@@ -89,17 +89,16 @@ loadBackupData();
 window.onload = () => {
     updateUI();
     document.querySelector('.user-name').innerText = userProgress.username;
-    // Başlangıçta perde açık
     document.getElementById('start-overlay').style.display = 'flex';
     currentGame.isPlaying = false;
 };
 
 // ==================================================================
-// 🎮 OYUN BAŞLATMA MANTIĞI (DÜZELTİLDİ - SIFIR HATA)
+// 🎮 OYUN BAŞLATMA MANTIĞI (GARANTİLİ)
 // ==================================================================
 
 window.startTournamentGame = async function() {
-    // 1. Oyun zaten kuruluysa ve sadece duraklatılmışsa devam et
+    // 1. Zaten oyun varsa devam et
     if (currentGame.isReady && currentGame.mode === 'tournament' && !currentGame.isPlaying) {
         resumeGame();
         return;
@@ -111,35 +110,41 @@ window.startTournamentGame = async function() {
         return;
     }
 
-    // 3. VERİ KONTROLÜ (Veri yoksa yükle, yüklenmezse yedek kullan)
+    // 3. Veri Kontrolü (Yoksa bekle, gelmezse yedeğe geç)
     if (localPuzzles.length === 0) {
         console.log("Veri bekleniyor...");
         await loadBackupData();
     }
 
-    // 4. BULMACA SEÇİMİ (Garantili)
-    let puzzleData;
+    // 4. Bulmacayı BELİRLE (Garanti)
+    let puzzleData = null;
+    
     if (localPuzzles.length > 0) {
+        // Normal Havuzdan
         let idx = (userProgress.level - 1) % localPuzzles.length;
         puzzleData = localPuzzles[idx];
-    } else {
-        // Eğer hala veri yoksa ACİL DURUM bulmacasını kullan
-        console.log("Acil durum bulmacası devreye girdi.");
+    } 
+    
+    // Eğer hala veri yoksa (Fetch başarısızsa) KESİN YEDEK KULLAN
+    if (!puzzleData) {
+        console.log("⚠️ Veri havuzu boş, Acil Durum Bulmacası devreye giriyor.");
         puzzleData = getBackupPuzzle();
     }
 
-    // 5. HER ŞEY HAZIRSA KOTA DÜŞ VE BAŞLAT
-    // Buraya kadar geldiyse puzzleData kesinlikle var demektir.
-    closeOverlays();
-    userProgress.dailyQuota--;
-    saveProgress();
-    updateUI();
+    // 5. Tahtayı Kurmayı Dene
+    const setupSuccess = setupBoard(puzzleData);
 
-    currentGame.mode = 'tournament';
-    
-    // Tahtayı kur ve başlat
-    setupBoard(puzzleData);
-    resumeGame();
+    // 6. SADECE Tahta Kurulduysa Oyunu Başlat
+    if (setupSuccess) {
+        closeOverlays();
+        userProgress.dailyQuota--; // Kotayı şimdi düş
+        saveProgress();
+        updateUI();
+        currentGame.mode = 'tournament';
+        resumeGame(); // Sayacı başlat
+    } else {
+        alert("Oyun yüklenirken bir hata oluştu. Lütfen sayfayı yenile.");
+    }
 };
 
 window.startDailyGame = async function() {
@@ -150,10 +155,7 @@ window.startDailyGame = async function() {
 
     if (hardPuzzles.length === 0) await loadBackupData();
 
-    currentGame.mode = 'daily';
-    
-    // Günlük bulmaca seç
-    let puzzleData;
+    let puzzleData = null;
     if (hardPuzzles.length > 0) {
         const today = new Date();
         const dateString = `${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}`;
@@ -161,25 +163,27 @@ window.startDailyGame = async function() {
         for (let i = 0; i < dateString.length; i++) hash = ((hash << 5) - hash) + dateString.charCodeAt(i) | 0;
         const uniqueIndex = Math.abs(hash) % hardPuzzles.length;
         puzzleData = hardPuzzles[uniqueIndex];
-    } else {
-        puzzleData = getBackupPuzzle();
     }
     
-    setupBoard(puzzleData);
-    
-    // Günlük oyun hemen başlamaz, perde iner, başlık değişir
-    currentGame.isPlaying = false;
-    if(currentGame.timerInterval) clearInterval(currentGame.timerInterval);
-    
-    const startTitle = document.querySelector('#start-overlay div');
-    if(startTitle) startTitle.innerText = "GÜNÜN BULMACASI";
-    
-    document.getElementById('start-overlay').style.display = 'flex';
-    closeOverlays();
-    document.getElementById('start-overlay').style.display = 'flex';
+    // Günlük için de yedek kontrolü
+    if (!puzzleData) puzzleData = getBackupPuzzle();
+
+    const setupSuccess = setupBoard(puzzleData);
+
+    if (setupSuccess) {
+        currentGame.mode = 'daily';
+        currentGame.isPlaying = false; // Hemen başlatma
+        if(currentGame.timerInterval) clearInterval(currentGame.timerInterval);
+        
+        const startTitle = document.querySelector('#start-overlay div');
+        if(startTitle) startTitle.innerText = "GÜNÜN BULMACASI";
+        
+        document.getElementById('start-overlay').style.display = 'flex';
+        closeOverlays();
+        document.getElementById('start-overlay').style.display = 'flex';
+    }
 };
 
-// Oyunu Başlat ve Perdeyi Kaldır
 function resumeGame() {
     document.getElementById('start-overlay').style.display = 'none';
     closeOverlays();
@@ -187,7 +191,7 @@ function resumeGame() {
     startTimer();
 }
 
-// Acil Durum Bulmacası (JSON Yüklenemezse devreye girer - Random 5'li Paket)
+// 5'li Yedek Paketi (Kodun İçine Gömülü - İNTERNETSİZ BİLE ÇALIŞIR)
 function getBackupPuzzle() {
     const backups = [
         { puzzle: "1572394684837569129628145..6954873212.1.6.8.48...216....9.782.6726.4.189.1869274.", solution: "157239468483756912962814537695487321231965874874321695349178256726543189518692743" },
@@ -196,8 +200,8 @@ function getBackupPuzzle() {
         { puzzle: "871.2965324.86.9.16931754829.6248.17...691.2.1245378.6...9..2.551238476946.752138", solution: "871429653245863971693175482936248517758691324124537896387916245512384769469752138" },
         { puzzle: "613948527459217.38728563419....7....867329145....8..7.576431..23428.6751981752364", solution: "613948527459217638728563419194675283867329145235184976576431892342896751981752364" }
     ];
-    const randomIndex = Math.floor(Math.random() * backups.length);
-    return backups[randomIndex];
+    const idx = Math.floor(Math.random() * backups.length);
+    return backups[idx];
 }
 
 // ------------------------------------------------------------------
@@ -205,7 +209,10 @@ function getBackupPuzzle() {
 // ------------------------------------------------------------------
 
 function setupBoard(data) {
-    if(!data) { console.error("Hata: Bulmaca verisi boş!"); return; } 
+    if(!data || !data.puzzle) { 
+        console.error("Hata: Geçersiz bulmaca verisi!"); 
+        return false; // Başarısız oldu sinyali
+    }
 
     currentGame.solution = data.solution;
     currentGame.puzzleStr = data.puzzle;
@@ -213,25 +220,27 @@ function setupBoard(data) {
     currentGame.isReady = true;
 
     const board = document.getElementById('sudoku-board');
-    board.innerHTML = ''; 
-
-    for (let i = 0; i < 81; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.dataset.index = i;
-        
-        const char = data.puzzle[i];
-        if (char !== '.' && char !== '0') {
-            cell.innerText = char;
-            cell.classList.add('initial');
-        } else {
-            cell.onclick = () => selectGameCell(cell);
+    if(board) {
+        board.innerHTML = ''; 
+        for (let i = 0; i < 81; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.index = i;
+            
+            const char = data.puzzle[i];
+            if (char !== '.' && char !== '0') {
+                cell.innerText = char;
+                cell.classList.add('initial');
+            } else {
+                cell.onclick = () => selectGameCell(cell);
+            }
+            board.appendChild(cell);
         }
-        board.appendChild(cell);
     }
     
     document.querySelector('.timer-val').innerText = "05:00";
     checkGroups(); 
+    return true; // Başarılı oldu sinyali
 }
 
 function selectGameCell(cell) {
@@ -278,6 +287,8 @@ window.handleInput = function(val) {
 
 function checkGroups() {
     const cells = document.querySelectorAll('.cell');
+    if(cells.length === 0) return;
+
     const groups = [];
     for(let r=0; r<9; r++) { let row = []; for(let c=0; c<9; c++) row.push(r*9+c); groups.push(row); }
     for(let c=0; c<9; c++) { let col = []; for(let r=0; r<9; r++) col.push(r*9+c); groups.push(col); }
