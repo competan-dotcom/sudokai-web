@@ -120,6 +120,14 @@
         .date-text { font-size: 0.75rem; font-weight: 700; color: var(--gray); opacity: 0.8; cursor: default; }
         .footer-brand { font-size: 0.75rem; font-weight: 700; color: var(--gray); opacity: 0.8; text-decoration: none; cursor: pointer; }
         .footer-group { display: flex; gap: 5px; align-items: center; }
+
+        /* Listeleri yukarı yaslamak için özel kural */
+        #leaderboard-overlay, #daily-winners-overlay {
+        justify-content: flex-start !important; /* Ortalamayı iptal et, üste yasla */
+        padding-top: 80px; /* Üstten güvenli boşluk bırak */
+        }
+
+
     </style>
 </head>
 <body>
