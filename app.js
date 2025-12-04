@@ -52,6 +52,7 @@ let selectedCell = null;
 
 // --- BAŞLANGIÇ KONTROLLERİ ---
 if (!localStorage.getItem('sudokai_user')) {
+    // İlk defa giriyorsa ve login olmamışsa
     saveProgress(); 
 }
 
@@ -90,7 +91,7 @@ async function initSystem() {
         btn.innerText = "VERİLER EŞİTLENİYOR...";
     }
 
-    // 2. BULUT SENKRONİZASYONU
+    // 2. BULUT SENKRONİZASYONU (KRİTİK ADIM)
     if (userProgress.email) {
         await syncWithCloud();
     }
@@ -126,7 +127,7 @@ async function syncWithCloud() {
             }
 
             userProgress = cloudData;
-            saveProgress(false); 
+            saveProgress(false); // Tekrar buluta yazmaya gerek yok, sadece locale kaydet
             updateUI();
             
             // İsim güncellemesi (Tekrar çalıştır çünkü cloud'dan yeni isim gelmiş olabilir)
@@ -142,6 +143,7 @@ async function syncWithCloud() {
             document.querySelector('.user-name').innerText = dispName.toUpperCase();
 
         } else {
+            // Kullanıcı bulutta yoksa, eldeki veriyi buluta yaz
             await saveProgress(true);
         }
     } catch (error) {
