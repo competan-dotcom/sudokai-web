@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v19.1 - FINAL REFINED)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v20.0 - RANK & LIST FIX)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -39,7 +39,7 @@ let gameData = {
 // LocalStorage'dan oku ama E-posta yoksa rastgele oluştur
 let userProgress = JSON.parse(localStorage.getItem('sudokai_user')) || {
     username: "Oyuncu_" + Math.floor(Math.random() * 9999), 
-    email: null, // Bulut senkronizasyonu için kritik anahtar
+    email: null, 
     level: 1, 
     score: 0, 
     dailyQuota: 20,     
@@ -52,7 +52,6 @@ let selectedCell = null;
 
 // --- BAŞLANGIÇ KONTROLLERİ ---
 if (!localStorage.getItem('sudokai_user')) {
-    // İlk defa giriyorsa ve login olmamışsa
     saveProgress(); 
 }
 
@@ -65,13 +64,21 @@ if (userProgress.lastPlayedDate !== new Date().toDateString()) {
     saveProgress();
 }
 
+// --- RÜTBE (KLASMAN) HESAPLAMA ---
+function getRankTitle(level) {
+    if (level <= 100) return "Çaylak";
+    if (level <= 200) return "Usta";
+    if (level <= 300) return "Mahir";
+    if (level <= 400) return "Üstad";
+    return "Kompetan";
+}
+
 // --- VERİ YÜKLEME VE İLK KURULUM ---
 async function initSystem() {
     // 1. Önce UI'ı güncelle
     updateUI();
     
-    // --- İSİM FORMATLAMA (Madde 1) ---
-    // "Ahmet Yılmaz" -> "AHMET Y." | "Soldier" -> "SOLDIER X."
+    // --- İSİM FORMATLAMA ---
     let dispName = userProgress.username;
     if (dispName.includes(' ')) {
         let parts = dispName.split(' ');
@@ -91,7 +98,7 @@ async function initSystem() {
         btn.innerText = "VERİLER EŞİTLENİYOR...";
     }
 
-    // 2. BULUT SENKRONİZASYONU (KRİTİK ADIM)
+    // 2. BULUT SENKRONİZASYONU
     if (userProgress.email) {
         await syncWithCloud();
     }
@@ -127,10 +134,10 @@ async function syncWithCloud() {
             }
 
             userProgress = cloudData;
-            saveProgress(false); // Tekrar buluta yazmaya gerek yok, sadece locale kaydet
+            saveProgress(false); 
             updateUI();
             
-            // İsim güncellemesi (Tekrar çalıştır çünkü cloud'dan yeni isim gelmiş olabilir)
+            // İsim güncellemesi 
             let dispName = userProgress.username;
             if (dispName.includes(' ')) {
                 let parts = dispName.split(' ');
@@ -143,7 +150,6 @@ async function syncWithCloud() {
             document.querySelector('.user-name').innerText = dispName.toUpperCase();
 
         } else {
-            // Kullanıcı bulutta yoksa, eldeki veriyi buluta yaz
             await saveProgress(true);
         }
     } catch (error) {
@@ -246,7 +252,6 @@ function renderBoard(data) {
 
 window.forceStartGame = function() {
     if (gameData.mode === 'tournament' && userProgress.dailyQuota <= 0) {
-        // ALERT YERİNE CUSTOM ALERT (Madde 3)
         window.showSystemAlert("KOTA DOLDU 🛑", "Bugünlük enerjin bitti şampiyon! Yarın tekrar gel.");
         return;
     }
@@ -265,7 +270,7 @@ window.forceStartGame = function() {
     
     if(gameData.mode === 'tournament') {
         userProgress.dailyQuota--;
-        saveProgress(true); // Kotayı buluta kaydet
+        saveProgress(true); 
         updateUI();
     }
     
@@ -410,6 +415,9 @@ async function checkWin() {
         const winTitle = document.querySelector('.win-title');
         const winText = document.querySelector('.win-text');
 
+        // ŞUANKİ RÜTBEYİ AL
+        let currentRank = getRankTitle(userProgress.level);
+
         if (gameData.mode === 'tournament') {
             let basePoints = 100;
             let timeBonus = gameData.timer;
@@ -418,8 +426,8 @@ async function checkWin() {
             userProgress.score += totalWin;
             if (userProgress.level < 500) userProgress.level++;
             
-            // Firebase Liderlik Tablosuna Kayıt
-            saveScoreToFirebase(userProgress.username, userProgress.score);
+            // Firebase'e Rütbe ile Kayıt
+            saveScoreToFirebase(userProgress.username, userProgress.score, currentRank);
 
             winTitle.innerText = "HARİKA! 🎉";
             winText.innerText = `Puanın: ${userProgress.score}\n(+${totalWin} Puan)`;
@@ -431,8 +439,8 @@ async function checkWin() {
             let timeTaken = 300 - gameData.timer;
             userProgress.dailyBestTime = timeTaken;
 
-            // Firebase Günlük Tabloya Kayıt
-            saveDailyScoreToFirebase(userProgress.username, timeTaken);
+            // Firebase'e Rütbe ile Kayıt
+            saveDailyScoreToFirebase(userProgress.username, timeTaken, currentRank);
 
             winTitle.innerText = "GÜNÜN ŞAMPİYONU! 🏆";
             winText.innerText = `Tamamlama Süresi: ${formatTime(timeTaken)}`;
@@ -440,7 +448,7 @@ async function checkWin() {
             winBtn.onclick = window.returnToTournament;
         }
 
-        saveProgress(true); // Puanları buluta da kaydet
+        saveProgress(true); 
         updateUI();
         document.getElementById('win-overlay').style.display = 'flex';
     }
@@ -486,7 +494,7 @@ window.openLeaderboard = async function() {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
             
-            // LİSTEDEKİ İSİMLERİ DE FORMATLA
+            // LİSTEDEKİ İSİMLERİ DE FORMATLA + RÜTBE GÖSTER
             let dispName = u.name;
             if (dispName.includes(' ')) {
                 let parts = dispName.split(' ');
@@ -494,12 +502,15 @@ window.openLeaderboard = async function() {
             } else {
                 dispName = `${dispName} X.`;
             }
+            
+            // Eğer veritabanında rank varsa onu da ekle, yoksa varsayılan Çaylak
+            let userRank = u.rank ? ` (${u.rank.toUpperCase()})` : '';
 
             let html = `
                 <div class="rank-item">
                     <div class="rank-left">
                         <div class="rank-pos ${rankClass}">${index + 1}</div>
-                        <div class="rank-name">${dispName.toUpperCase()}</div>
+                        <div class="rank-name">${dispName.toUpperCase()}${userRank}</div>
                     </div>
                     <div class="rank-score">${u.score} P</div>
                 </div>`;
@@ -532,7 +543,7 @@ window.openDailyWinners = async function() {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
             
-            // LİSTEDEKİ İSİMLERİ DE FORMATLA
+            // LİSTEDEKİ İSİMLERİ DE FORMATLA + RÜTBE GÖSTER
             let dispName = u.name;
             if (dispName.includes(' ')) {
                 let parts = dispName.split(' ');
@@ -540,12 +551,14 @@ window.openDailyWinners = async function() {
             } else {
                 dispName = `${dispName} X.`;
             }
+            
+            let userRank = u.rank ? ` (${u.rank.toUpperCase()})` : '';
 
             let html = `
                 <div class="rank-item">
                     <div class="rank-left">
                         <div class="rank-pos ${rankClass}">${index + 1}</div>
-                        <div class="rank-name">${dispName.toUpperCase()}</div>
+                        <div class="rank-name">${dispName.toUpperCase()}${userRank}</div>
                     </div>
                     <div class="rank-score">${formatTime(u.time)}</div>
                 </div>`;
@@ -558,21 +571,25 @@ window.openDailyWinners = async function() {
     }
 };
 
-// --- CUSTOM ALERT FONKSİYONU (Madde 3) ---
 window.showSystemAlert = function(title, msg) {
     document.getElementById('alert-title').innerText = title;
     document.getElementById('alert-msg').innerText = msg;
     document.getElementById('custom-alert-overlay').style.display = 'flex';
 }
 
-// --- YARDIMCI FONKSİYONLAR ---
 function updateUI() {
     document.querySelector('.level-val').innerHTML = `${userProgress.level}<span class="level-total">/500</span>`;
     document.querySelector('.quota-val').innerText = `${userProgress.dailyQuota}/20`;
     document.querySelector('.score-val').innerText = userProgress.score;
+    
+    // RÜTBE GÜNCELLEME
+    let currentRank = getRankTitle(userProgress.level);
+    let rankEl = document.querySelector('.user-rank');
+    if(rankEl) {
+        rankEl.innerHTML = `<div class="rank-dot"></div><span>${currentRank}</span>`;
+    }
 }
 
-// Kaydetme Fonksiyonu: Hem LocalStorage'a hem de (Eğer varsa) Firebase'e yazar
 async function saveProgress(forceCloud = false) { 
     localStorage.setItem('sudokai_user', JSON.stringify(userProgress));
     
@@ -596,22 +613,23 @@ function formatTime(seconds) {
     return `${m}:${s}`;
 }
 
-// --- FIREBASE LİDERLİK TABLOSU KAYITLARI ---
-async function saveScoreToFirebase(name, score) {
+// --- FIREBASE LİDERLİK TABLOSU KAYITLARI (GÜNCELLENDİ: RANK EKLENDİ) ---
+async function saveScoreToFirebase(name, score, rank) {
     try {
         const userRef = doc(db, "leaderboard", name);
-        await setDoc(userRef, { name: name, score: score, lastUpdate: new Date() }, { merge: true });
+        // Rank bilgisini de kaydediyoruz
+        await setDoc(userRef, { name: name, score: score, rank: rank, lastUpdate: new Date() }, { merge: true });
     } catch (e) { console.error("Skor hatası", e); }
 }
 
-async function saveDailyScoreToFirebase(name, timeSeconds) {
+async function saveDailyScoreToFirebase(name, timeSeconds, rank) {
     try {
         const today = new Date().toISOString().slice(0,10);
         const collectionName = "daily_winners_" + today;
         const userRef = doc(db, collectionName, name);
-        await setDoc(userRef, { name: name, time: timeSeconds });
+        // Rank bilgisini de kaydediyoruz
+        await setDoc(userRef, { name: name, time: timeSeconds, rank: rank });
     } catch (e) { console.error("Günlük skor hatası", e); }
 }
 
-// --- SİSTEMİ BAŞLAT ---
 window.onload = initSystem;

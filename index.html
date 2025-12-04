@@ -119,12 +119,11 @@
             signInWithPopup(auth, provider).then((result) => {
                 const user = result.user;
                 
-                // --- YENİ KOD: HESAP KARIŞIKLIĞINI ÖNLEME ---
-                // Mevcut local veriyi çek
+                // --- HESAP KARIŞIKLIĞINI ÖNLEME ---
                 let storedData = JSON.parse(localStorage.getItem('sudokai_user'));
                 let userData = {};
 
-                // Eğer veri yoksa VEYA giriş yapan email, kayıtlı email ile aynı değilse SIFIRLA
+                // Farklı kişi girerse sıfırla
                 if (!storedData || storedData.email !== user.email) {
                     userData = {
                         username: user.displayName || user.email.split('@')[0],
@@ -137,7 +136,6 @@
                         dailyBestTime: null
                     };
                 } else {
-                    // Aynı kişi ise veriyi koru
                     userData = storedData;
                 }
 
@@ -145,9 +143,6 @@
                 window.location.href = "game.html";
             }).catch((error) => { alert("Giriş yapılamadı: " + error.message); });
         });
-
-        onAuthStateChanged(auth, (user) => { if (user) { /* İsteğe bağlı */ } });
     </script>
-
 </body>
 </html>

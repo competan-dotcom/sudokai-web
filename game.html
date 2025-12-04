@@ -19,23 +19,16 @@
             background: linear-gradient(180deg, #f0f6ff 0%, #fff0f5 100%);
             display: flex; justify-content: center; 
             color: var(--primary);
-            /* MOBİL SCROLL AYARI (Footer görünsün, sağa sola oynamasın) */
-            overflow-y: auto; 
-            overflow-x: hidden; 
-            -webkit-overflow-scrolling: touch; 
+            overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; 
         }
 
         .game-container { width: 100%; max-width: 430px; height: 100%; display: flex; flex-direction: column; padding: 10px 16px; position: relative; gap: 5px; }
         
         /* --- ÜST BLOKLAR --- */
         .brand-panel { display: flex; align-items: center; justify-content: space-between; height: 60px; border-bottom: 1px solid rgba(0,0,0,0.05); flex-shrink: 0; }
-        
         .brand-left { width: 100px; } 
-        
-        /* İkon Kaydırma (3px soldan boşluk) */
         .mini-icon { display: flex; align-items: center; padding-left: 3px; }
         .mini-icon svg { width: 38px; height: 38px; overflow: visible; }
-        
         .brand-right { width: 100px; display: flex; justify-content: flex-end; }
         .grid-line { stroke: #000; stroke-width: 2; stroke-linecap: square; } .shape-fill { fill: #000; }
         .ghost-num { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 10px; text-anchor: middle; dominant-baseline: central; opacity: 0; animation: twinkle 3s infinite ease-in-out; }
@@ -43,7 +36,6 @@
         .delay-1 { animation-delay: 0s; } .delay-2 { animation-delay: 1.5s; } .delay-3 { animation-delay: 0.5s; } .delay-4 { animation-delay: 2.2s; } .delay-5 { animation-delay: 1s; }
         @keyframes twinkle { 0% { opacity: 0; } 20% { opacity: 1; } 40% { opacity: 0; } 100% { opacity: 0; } }
         
-        /* Logo Link Özelliği */
         .mini-logo { font-family: 'Permanent Marker', cursive; font-size: 2.2rem; margin: 0; color: #000; letter-spacing: 1px; cursor: pointer; user-select: none; } 
         .mini-logo span { color: var(--red); }
         
@@ -51,7 +43,6 @@
         .daily-top-row { display: flex; align-items: center; gap: 3px; }
         .daily-text-std { font-size: 0.65rem; font-weight: 800; color: var(--primary); }
         
-        /* Siren İkonu CSS */
         .daily-icon { width: 18px; height: 10px; background: transparent; border: 1px solid #fee2e2; border-radius: 20%; display: flex; align-items: center; justify-content: center; }
         @keyframes siren-flash { 
             0% { background-color: #ef4444; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
@@ -74,11 +65,10 @@
         .timer-val { font-size: 0.85rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; color: var(--primary); }
 
         /* --- OYUN ALANI --- */
-        .game-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; /* Gap 0 yapıldı, marginlerle yöneteceğiz */ position: relative; overflow-y: auto; padding-top: 5px; padding-bottom: 20px; -ms-overflow-style: none; scrollbar-width: none; }
+        .game-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; position: relative; overflow-y: auto; padding-top: 5px; padding-bottom: 20px; -ms-overflow-style: none; scrollbar-width: none; }
         .game-area::-webkit-scrollbar { display: none; }
 
-        /* KURALLAR KUTUSU */
-        .rules-container { position: relative; width: 100%; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.3s ease; flex-shrink: 0; z-index: 110; margin-bottom: 0; /* Alt boşluğu top-stats-bar'a verdik */ }
+        .rules-container { position: relative; width: 100%; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.3s ease; flex-shrink: 0; z-index: 110; margin-bottom: 0; }
         .rules-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; cursor: pointer; background: #fff; user-select: none; }
         .rules-header:active { background-color: #f8fafc; }
         .rules-title { font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 0.5px; }
@@ -89,45 +79,21 @@
         .rules-container.open .rules-body { max-height: 280px; opacity: 1; padding: 8px 16px 12px 16px; border-top: 1px solid var(--border); }
         
         .rules-list { margin: 0; padding: 0; list-style: none; font-size: 0.8rem; color: #475569; line-height: 1; }
-        .rules-list li { 
-            margin-bottom: 6px; /* Satırlar arası mesafeyi azıcık açtık, okunur olsun */
-            display: block;     /* Flex'i iptal ettik, yan yana aksın */
-            line-height: 1;   
-            }
+        .rules-list li { margin-bottom: 6px; display: block; line-height: 1; }
         .rules-list strong { color: var(--primary); font-weight: 800; }
         .good-luck { margin-top: 8px; font-size: 0.7rem; font-weight: 800; color: var(--red); text-align: right; }
 
-        /* BUTONLAR VE İSTATİSTİKLER (Boşluk Düzenlemesi) */
-        .top-stats-bar { 
-            display: flex; 
-            gap: 10px; /* Butonlar arası boşluk */
-            width: 100%; 
-            flex-shrink: 0; 
-            margin-top: 10px; /* Nasıl Oynanır ile arasındaki boşluk */
-            margin-bottom: 10px; /* Tahta ile arasındaki boşluk */
-        }
+        .top-stats-bar { display: flex; gap: 10px; width: 100%; flex-shrink: 0; margin-top: 10px; margin-bottom: 10px; }
 
         .stat-btn { flex: 1; text-decoration: none; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; color: #000; background: white; padding: 6px 4px; border-radius: 12px; border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; letter-spacing: 0.2px; line-height: 1.1; text-align: center; min-height: 42px; }
         .stat-btn span svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
         .stat-btn:active { transform: scale(0.98); background-color: #f8fafc; }
         .stat-btn:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-        
-        /* Kırmızı Kupa İkonu (Madde 7) */
-        .icon-trophy { color: var(--red); } 
-        .icon-zap { color: var(--red); }
+        .icon-trophy { color: var(--red); } .icon-zap { color: var(--red); }
 
-        /* OVERLAYLER (Liste Ekranları - Boşluk Düzeltme) */
-        .overlay-full { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #ffffff; display: none; flex-direction: column; 
-            align-items: center; z-index: 100; border-radius: 8px;
-            /* Ortalamayı iptal edip üste yasladık */
-            justify-content: flex-start; 
-            padding-top: 60px; /* Üstten makul boşluk */
-            gap: 15px; /* Elemanlar arası mesafe */
-        }
+        .overlay-full { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: none; flex-direction: column; align-items: center; z-index: 100; border-radius: 8px; justify-content: flex-start; padding-top: 60px; gap: 15px; }
         
-        #start-overlay { display: flex; justify-content: center; gap: 15px; padding-top: 0; } /* Start ekranı ortada kalsın */
+        #start-overlay { display: flex; justify-content: center; gap: 15px; padding-top: 0; }
         #leaderboard-overlay, #daily-winners-overlay { z-index: 110; }
 
         .start-btn { background: var(--red); color: white; padding: 14px 45px; border-radius: 12px; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer; z-index: 101; position: relative; box-shadow: 0 10px 20px -5px rgba(234, 29, 44, 0.4); transition: transform 0.1s; }
@@ -137,7 +103,6 @@
         .win-title { font-size: 2rem; font-family: 'Permanent Marker', cursive; color: var(--green-text); margin-bottom: 10px; transform: rotate(-5deg); }
         .win-text { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; text-align: center; line-height: 1.5; white-space: pre-line; }
 
-        /* LİSTE TASARIMI */
         .overlay-header { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; text-align: center; }
         .total-count-text { font-size: 0.75rem; color: var(--gray); font-weight: 600; margin-bottom: 5px; letter-spacing: 0.5px; }
         
@@ -151,7 +116,6 @@
         
         .close-overlay-btn { margin-top: 10px; background: transparent; border: 1px solid var(--border); padding: 8px 30px; border-radius: 20px; color: var(--gray); font-weight: 700; font-size: 0.75rem; cursor: pointer; }
 
-        /* GRID */
         .sudoku-grid { display: grid; grid-template-columns: repeat(9, 1fr); background: var(--primary); gap: 1px; border: 2px solid var(--primary); width: 100%; aspect-ratio: 1/1; max-height: 50vh; flex-shrink: 0; }
         .cell { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 600; color: var(--primary); cursor: pointer; position: relative; transition: background-color 0.2s; }
         .cell:nth-child(3n) { border-right: 2px solid var(--primary); } .cell:nth-child(9n) { border-right: none; }
@@ -163,8 +127,7 @@
         .cell.error { background-color: var(--error-bg) !important; color: var(--red) !important; animation: shake 0.3s; }
         @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 100% { transform: translateX(0); } }
 
-        /* NUMPAD */
-        .numpad-container { width: 100%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 10px; /* Mobilde aşağı kaçmaması için auto yerine 10px */ }
+        .numpad-container { width: 100%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 10px; }
         .num-btn { height: 38px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; color: var(--primary); cursor: pointer; box-shadow: var(--btn-shadow); transition: all 0.1s ease; position: relative; top: 0; }
         .num-btn:active { top: 3px; box-shadow: var(--btn-active-shadow); }
         .num-btn.eraser { background-color: #f1f5f9; color: var(--gray); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
@@ -176,7 +139,6 @@
         .footer-brand { font-size: 0.75rem; font-weight: 700; color: var(--gray); opacity: 0.8; text-decoration: none; cursor: pointer; }
         .footer-group { display: flex; gap: 5px; align-items: center; }
 
-        /* CUSTOM ALERT MODAL (Madde 3) */
         #custom-alert-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.6); z-index: 999;
@@ -287,7 +249,7 @@
             </div>
 
             <div id="leaderboard-overlay" class="overlay-full">
-                <div class="overlay-header">TURNUVA PUAN DURUMU</div>
+                <div class="overlay-header">TURNUVA GENEL PUAN DURUMU</div>
                 <div id="total-player-count" class="total-count-text">Yükleniyor...</div>
                 
                 <div class="rank-list" id="global-rank-list"></div>
@@ -326,7 +288,7 @@
         </div>
     </div>
 
-    <script type="module" src="app.js?v=final_fix_v19"></script>
+    <script type="module" src="app.js?v=final_fix_v20"></script>
     <script>
         function toggleRules() {
             const container = document.querySelector('.rules-container');
