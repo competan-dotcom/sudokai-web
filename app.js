@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v19.0 - CLOUD SYNC)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v19.1 - FINAL REFINED)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -52,7 +52,6 @@ let selectedCell = null;
 
 // --- BAŞLANGIÇ KONTROLLERİ ---
 if (!localStorage.getItem('sudokai_user')) {
-    // İlk defa giriyorsa ve login olmamışsa
     saveProgress(); 
 }
 
@@ -67,9 +66,23 @@ if (userProgress.lastPlayedDate !== new Date().toDateString()) {
 
 // --- VERİ YÜKLEME VE İLK KURULUM ---
 async function initSystem() {
-    // 1. Önce UI'ı mevcut yerel veriyle güncelle (Hız hissi için)
+    // 1. Önce UI'ı güncelle
     updateUI();
-    document.querySelector('.user-name').innerText = userProgress.username;
+    
+    // --- İSİM FORMATLAMA (Madde 1) ---
+    // "Ahmet Yılmaz" -> "AHMET Y." | "Soldier" -> "SOLDIER X."
+    let dispName = userProgress.username;
+    if (dispName.includes(' ')) {
+        let parts = dispName.split(' ');
+        if (parts.length > 1) {
+            let firstName = parts[0];
+            let lastName = parts[parts.length - 1];
+            dispName = `${firstName} ${lastName.charAt(0)}.`;
+        }
+    } else {
+        dispName = `${dispName} X.`;
+    }
+    document.querySelector('.user-name').innerText = dispName.toUpperCase();
     
     const btn = document.getElementById('main-start-btn');
     if(btn) {
@@ -77,8 +90,7 @@ async function initSystem() {
         btn.innerText = "VERİLER EŞİTLENİYOR...";
     }
 
-    // 2. BULUT SENKRONİZASYONU (KRİTİK ADIM)
-    // Eğer kullanıcının emaili varsa, buluttan en son veriyi çek
+    // 2. BULUT SENKRONİZASYONU
     if (userProgress.email) {
         await syncWithCloud();
     }
@@ -100,7 +112,6 @@ async function initSystem() {
 // --- CLOUD SYNC FONKSİYONLARI ---
 async function syncWithCloud() {
     try {
-        // Firestore'dan bu email'e ait veriyi çek
         const docRef = doc(db, "users_progress", userProgress.email);
         const docSnap = await getDoc(docRef);
 
@@ -108,8 +119,6 @@ async function syncWithCloud() {
             const cloudData = docSnap.data();
             console.log("Buluttan veri alındı:", cloudData);
             
-            // Buluttaki veri daha güncel kabul edilir, yerel veriyi ez
-            // Ancak tarih farkı varsa kotayı kontrol et
             if (cloudData.lastPlayedDate !== new Date().toDateString()) {
                 cloudData.dailyQuota = 20;
                 cloudData.hasPlayedDailyChallenge = false;
@@ -117,11 +126,22 @@ async function syncWithCloud() {
             }
 
             userProgress = cloudData;
-            saveProgress(false); // Tekrar buluta yazmaya gerek yok, sadece locale kaydet
+            saveProgress(false); 
             updateUI();
-            document.querySelector('.user-name').innerText = userProgress.username;
+            
+            // İsim güncellemesi (Tekrar çalıştır çünkü cloud'dan yeni isim gelmiş olabilir)
+            let dispName = userProgress.username;
+            if (dispName.includes(' ')) {
+                let parts = dispName.split(' ');
+                if (parts.length > 1) {
+                    dispName = `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+                }
+            } else {
+                dispName = `${dispName} X.`;
+            }
+            document.querySelector('.user-name').innerText = dispName.toUpperCase();
+
         } else {
-            // Kullanıcı bulutta yoksa, eldeki veriyi buluta yaz
             await saveProgress(true);
         }
     } catch (error) {
@@ -224,12 +244,13 @@ function renderBoard(data) {
 
 window.forceStartGame = function() {
     if (gameData.mode === 'tournament' && userProgress.dailyQuota <= 0) {
-        alert("Günlük kotan doldu şampiyon! Yarın gel. 🛑");
+        // ALERT YERİNE CUSTOM ALERT (Madde 3)
+        window.showSystemAlert("KOTA DOLDU 🛑", "Bugünlük enerjin bitti şampiyon! Yarın tekrar gel.");
         return;
     }
     
     if (gameData.mode === 'daily' && userProgress.hasPlayedDailyChallenge) {
-        alert("Bugünlük görevi zaten tamamladın! 🏆");
+        window.showSystemAlert("GÖREV TAMAM 🏆", "Bugünün bulmacasını zaten çözdün! Yarın yeni bir meydan okuma seni bekliyor.");
         returnToTournament();
         return;
     }
@@ -366,7 +387,7 @@ function updateTimerDisplay() {
 function handleGameOver() {
     clearInterval(gameData.timerInterval);
     gameData.isPlaying = false;
-    alert("SÜRE DOLDU! 😢");
+    window.showSystemAlert("SÜRE DOLDU ⌛", "Zamanın tükendi ama pes etmek yok! Tekrar dene.");
     prepareNextGame('tournament');
     document.getElementById('start-overlay').style.display = 'flex';
 }
@@ -463,11 +484,20 @@ window.openLeaderboard = async function() {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
             
+            // LİSTEDEKİ İSİMLERİ DE FORMATLA
+            let dispName = u.name;
+            if (dispName.includes(' ')) {
+                let parts = dispName.split(' ');
+                if(parts.length > 1) dispName = `${parts[0]} ${parts[parts.length-1].charAt(0)}.`;
+            } else {
+                dispName = `${dispName} X.`;
+            }
+
             let html = `
                 <div class="rank-item">
                     <div class="rank-left">
                         <div class="rank-pos ${rankClass}">${index + 1}</div>
-                        <div class="rank-name">${u.name}</div>
+                        <div class="rank-name">${dispName.toUpperCase()}</div>
                     </div>
                     <div class="rank-score">${u.score} P</div>
                 </div>`;
@@ -500,11 +530,20 @@ window.openDailyWinners = async function() {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
             
+            // LİSTEDEKİ İSİMLERİ DE FORMATLA
+            let dispName = u.name;
+            if (dispName.includes(' ')) {
+                let parts = dispName.split(' ');
+                if(parts.length > 1) dispName = `${parts[0]} ${parts[parts.length-1].charAt(0)}.`;
+            } else {
+                dispName = `${dispName} X.`;
+            }
+
             let html = `
                 <div class="rank-item">
                     <div class="rank-left">
                         <div class="rank-pos ${rankClass}">${index + 1}</div>
-                        <div class="rank-name">${u.name}</div>
+                        <div class="rank-name">${dispName.toUpperCase()}</div>
                     </div>
                     <div class="rank-score">${formatTime(u.time)}</div>
                 </div>`;
@@ -516,6 +555,13 @@ window.openDailyWinners = async function() {
         list.innerHTML = '<div style="text-align:center;">Henüz veri yok.</div>';
     }
 };
+
+// --- CUSTOM ALERT FONKSİYONU (Madde 3) ---
+window.showSystemAlert = function(title, msg) {
+    document.getElementById('alert-title').innerText = title;
+    document.getElementById('alert-msg').innerText = msg;
+    document.getElementById('custom-alert-overlay').style.display = 'flex';
+}
 
 // --- YARDIMCI FONKSİYONLAR ---
 function updateUI() {
