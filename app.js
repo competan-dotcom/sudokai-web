@@ -613,11 +613,16 @@ function formatTime(seconds) {
     return `${m}:${s}`;
 }
 
-// --- FIREBASE LİDERLİK TABLOSU KAYITLARI (GÜNCELLENDİ: RANK EKLENDİ) ---
+// --- FIREBASE LİDERLİK TABLOSU KAYITLARI (GÜNCELLENDİ: ARTIK E-MAİL BAZLI KAYDEDİYOR) ---
 async function saveScoreToFirebase(name, score, rank) {
     try {
-        const userRef = doc(db, "leaderboard", name);
-        // Rank bilgisini de kaydediyoruz
+        // ESKİSİ: const userRef = doc(db, "leaderboard", name); 
+        // YENİSİ: Dosya ismi olarak 'name' değil 'email' kullanıyoruz ki çakışmasın.
+        const docId = userProgress.email ? userProgress.email : name;
+        
+        const userRef = doc(db, "leaderboard", docId);
+        
+        // İçerik olarak 'name' gönderiyoruz ki listede email yerine isim yazsın.
         await setDoc(userRef, { name: name, score: score, rank: rank, lastUpdate: new Date() }, { merge: true });
     } catch (e) { console.error("Skor hatası", e); }
 }
@@ -626,8 +631,11 @@ async function saveDailyScoreToFirebase(name, timeSeconds, rank) {
     try {
         const today = new Date().toISOString().slice(0,10);
         const collectionName = "daily_winners_" + today;
-        const userRef = doc(db, collectionName, name);
-        // Rank bilgisini de kaydediyoruz
+        
+        // BURADA DA E-MAİL KULLANIYORUZ
+        const docId = userProgress.email ? userProgress.email : name;
+        
+        const userRef = doc(db, collectionName, docId);
         await setDoc(userRef, { name: name, time: timeSeconds, rank: rank });
     } catch (e) { console.error("Günlük skor hatası", e); }
 }
