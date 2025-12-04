@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v16.0 - ULTIMATE FIX)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v15.0 - LOGIC FIX)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -9,7 +9,7 @@ import {
     query, orderBy, limit 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// SENİN AYARLARIN
+// FIREBASE AYARLARI
 const firebaseConfig = {
   apiKey: "AIzaSyDrzD5FkOCsNUFeiuvzeHEjiNvFYc5B0Bo",
   authDomain: "sudokai-ac7be.firebaseapp.com",
@@ -24,7 +24,7 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
-// Global Değişkenler
+// GLOBAL DEĞİŞKENLER
 let localPuzzles = [];
 let hardPuzzles = [];
 let currentGame = {
@@ -39,33 +39,27 @@ let currentGame = {
 
 let userProgress = JSON.parse(localStorage.getItem('sudokai_user')) || {
     username: "Oyuncu_" + Math.floor(Math.random() * 9999),
-    level: 1,           
-    score: 0,           
-    dailyQuota: 20,     
-    lastPlayedDate: new Date().toDateString(),
-    hasPlayedDailyChallenge: false, 
-    dailyBestTime: null 
+    level: 1, score: 0, dailyQuota: 20, lastPlayedDate: new Date().toDateString(),
+    hasPlayedDailyChallenge: false, dailyBestTime: null 
 };
 
+// İsim ve Tarih Kontrolü
 if (!localStorage.getItem('sudokai_user')) {
     let name = prompt("Kullanıcı adın nedir şampiyon?", userProgress.username);
     if(name) userProgress.username = name.toUpperCase().replace(/[^A-Z0-9_]/g, '');
     saveProgress();
 }
-
 if (userProgress.lastPlayedDate !== new Date().toDateString()) {
-    userProgress.dailyQuota = 20;
-    userProgress.hasPlayedDailyChallenge = false;
-    userProgress.dailyBestTime = null;
-    userProgress.lastPlayedDate = new Date().toDateString();
+    userProgress.dailyQuota = 20; userProgress.hasPlayedDailyChallenge = false;
+    userProgress.dailyBestTime = null; userProgress.lastPlayedDate = new Date().toDateString();
     saveProgress();
 }
 
 let selectedCell = null;
 
-// Verileri Yükle
+// JSON Yükleme Fonksiyonu (Promise Döndürür)
 async function loadBackupData() {
-    if(localPuzzles.length > 0) return true;
+    if(localPuzzles.length > 0) return true; // Zaten yüklüyse tamam
     try {
         const res = await fetch('tum_bulmacalar_SIRALI.json');
         if (res.ok) {
@@ -75,14 +69,19 @@ async function loadBackupData() {
             if(data.tier_3) localPuzzles = localPuzzles.concat(data.tier_3);
             if(data.tier_4) localPuzzles = localPuzzles.concat(data.tier_4);
             if(data.tier_5) localPuzzles = localPuzzles.concat(data.tier_5);
+            // Günlük için zorlar
             if(data.tier_4) hardPuzzles = hardPuzzles.concat(data.tier_4);
             if(data.tier_5) hardPuzzles = hardPuzzles.concat(data.tier_5);
-            console.log("Veriler yüklendi.");
+            console.log("Veriler başarıyla yüklendi.");
             return true;
         }
-    } catch (e) { console.log("JSON Yedeği yüklenemedi"); return false; }
+    } catch (e) { 
+        console.warn("JSON Yüklenemedi, yedek moda geçilecek."); 
+        return false;
+    }
+    return false;
 }
-// Arka planda başlat
+// Sayfa açılınca arkada yüklemeye başla
 loadBackupData();
 
 window.onload = () => {
@@ -92,12 +91,12 @@ window.onload = () => {
     currentGame.isPlaying = false;
 };
 
-// ------------------------------------------------------------------
-// 🎮 OYUN BAŞLATMA (SENKRONİZE EDİLDİ)
-// ------------------------------------------------------------------
+// ==================================================================
+// 🎮 OYUN BAŞLATMA (DÜZELTİLMİŞ AKIŞ)
+// ==================================================================
 
 window.startTournamentGame = async function() {
-    // 1. Oyun zaten devam ediyorsa perdeyi kaldır
+    // 1. Oyun zaten duraklatılmışsa devam et (Kota düşme!)
     if (currentGame.isReady && currentGame.mode === 'tournament' && !currentGame.isPlaying) {
         resumeGame();
         return;
@@ -109,36 +108,38 @@ window.startTournamentGame = async function() {
         return;
     }
 
-    // 3. Veri Yoksa YÜKLE VE BEKLE
+    // 3. Veri Kontrolü (Yoksa bekle)
     if (localPuzzles.length === 0) {
         console.log("Veri bekleniyor...");
-        await loadBackupData();
+        await loadBackupData(); // Bu satır verinin inmesini BEKLER
     }
 
-    // 4. Bulmacayı Seç (Veri yoksa YEDEK)
+    // 4. Bulmacayı Seç
     let puzzleData = null;
     if (localPuzzles.length > 0) {
         let idx = (userProgress.level - 1) % localPuzzles.length;
         puzzleData = localPuzzles[idx];
     } else {
-        console.log("Acil durum yedeği (ZOR) açılıyor.");
+        // Veri kesinlikle yoksa yedeği al
         puzzleData = getBackupPuzzle();
     }
 
-    // 5. Tahtayı Kur
-    const setupSuccess = setupBoard(puzzleData);
+    // 5. Tahtayı Kurmaya Çalış
+    const isBoardSetup = setupBoard(puzzleData);
 
-    // 6. SADECE Tahta Kurulduysa Başlat
-    if (setupSuccess) {
+    // 6. KRİTİK NOKTA: Sadece Tahta Kurulduysa Başlat
+    if (isBoardSetup) {
         closeOverlays();
+        
+        // Kotayı SADECE burada düşüyoruz
         userProgress.dailyQuota--; 
         saveProgress();
         updateUI();
         
         currentGame.mode = 'tournament';
-        resumeGame(); // Perdeyi kaldır, sayacı başlat
+        resumeGame(); // Sayacı başlat
     } else {
-        alert("Hata: Oyun kurulamadı. Lütfen sayfayı yenile.");
+        alert("Oyun oluşturulamadı. Lütfen sayfayı yenile.");
     }
 };
 
@@ -162,9 +163,9 @@ window.startDailyGame = async function() {
         puzzleData = getBackupPuzzle();
     }
     
-    if(setupBoard(puzzleData)) {
+    if (setupBoard(puzzleData)) {
         currentGame.mode = 'daily';
-        currentGame.isPlaying = false; 
+        currentGame.isPlaying = false; // Hemen başlatma
         if(currentGame.timerInterval) clearInterval(currentGame.timerInterval);
         
         const startTitle = document.querySelector('#start-overlay div');
@@ -183,7 +184,7 @@ function resumeGame() {
     startTimer();
 }
 
-// 🛡️ TIER 5 (INSANE) YEDEK PAKETİ (ZOR)
+// 5'li ZOR Yedek Paketi
 function getBackupPuzzle() {
     const backups = [
         { puzzle: ".4..............3.......97....7...4.....8........2....52.816.9.739245186816......", solution: "348697512297158634165432978952761843471583269683924751524816397739245186816379425" },
@@ -229,7 +230,7 @@ function setupBoard(data) {
     
     document.querySelector('.timer-val').innerText = "05:00";
     checkGroups(); 
-    return true; // Başarılı sinyali
+    return true;
 }
 
 function selectGameCell(cell) {
@@ -318,6 +319,7 @@ function startTimer() {
     }, 1000);
 }
 
+// KAZANMA VE KAYIT
 async function checkWin() {
     const cells = document.querySelectorAll('.cell');
     let isComplete = true;
@@ -334,8 +336,9 @@ async function checkWin() {
             let timePoints = currentGame.timer;
             userProgress.score += (levelPoints + timePoints);
             if (userProgress.level < 500) userProgress.level++;
-            try { await saveScoreToFirebase(userProgress.username, userProgress.score); } catch(e){}
             
+            try { await saveScoreToFirebase(userProgress.username, userProgress.score); } catch(e){}
+
             document.querySelector('.win-title').innerText = "HARİKA! 🎉";
             document.querySelector('.win-text').innerText = `Puanın: ${userProgress.score}`;
             winBtn.innerText = "SONRAKİ BÖLÜM ▶";
@@ -362,16 +365,14 @@ async function checkWin() {
     }
 }
 
-// Force Start: Sadece JS fonksiyonunu tetikler
+// Force Start
 window.forceStartGame = function() {
     if (currentGame.mode === 'daily') {
         resumeGame();
     } else {
-        // Eğer tahta kurulu değilse kurmaya çalış
         if(!currentGame.isReady) {
             window.startTournamentGame(); 
         } else {
-            // Kuruluysa devam et
             resumeGame();
         }
     }
