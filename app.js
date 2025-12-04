@@ -1,11 +1,11 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v18.1 - FINAL STABLE)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v19.0 - CLOUD SYNC)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 import { 
-    getFirestore, collection, doc, getDocs, setDoc, 
+    getFirestore, collection, doc, getDoc, getDocs, setDoc, 
     query, orderBy, limit 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -36,8 +36,10 @@ let gameData = {
     mode: 'tournament' // 'tournament' veya 'daily'
 };
 
+// LocalStorage'dan oku ama E-posta yoksa rastgele oluştur
 let userProgress = JSON.parse(localStorage.getItem('sudokai_user')) || {
     username: "Oyuncu_" + Math.floor(Math.random() * 9999), 
+    email: null, // Bulut senkronizasyonu için kritik anahtar
     level: 1, 
     score: 0, 
     dailyQuota: 20,     
@@ -50,11 +52,11 @@ let selectedCell = null;
 
 // --- BAŞLANGIÇ KONTROLLERİ ---
 if (!localStorage.getItem('sudokai_user')) {
-    let name = prompt("Kullanıcı adın nedir şampiyon?", userProgress.username);
-    if(name) userProgress.username = name.toUpperCase().replace(/[^A-Z0-9_]/g, '');
-    saveProgress();
+    // İlk defa giriyorsa ve login olmamışsa
+    saveProgress(); 
 }
 
+// Tarih kontrolü (Günlük Kota Sıfırlama)
 if (userProgress.lastPlayedDate !== new Date().toDateString()) {
     userProgress.dailyQuota = 20; 
     userProgress.hasPlayedDailyChallenge = false;
@@ -65,28 +67,65 @@ if (userProgress.lastPlayedDate !== new Date().toDateString()) {
 
 // --- VERİ YÜKLEME VE İLK KURULUM ---
 async function initSystem() {
+    // 1. Önce UI'ı mevcut yerel veriyle güncelle (Hız hissi için)
     updateUI();
     document.querySelector('.user-name').innerText = userProgress.username;
     
-    // Butonu pasife al, yükleniyor mesajı ver
     const btn = document.getElementById('main-start-btn');
     if(btn) {
         btn.disabled = true;
-        btn.innerText = "SİSTEM HAZIRLANIYOR...";
+        btn.innerText = "VERİLER EŞİTLENİYOR...";
     }
 
-    // Veriyi çek
+    // 2. BULUT SENKRONİZASYONU (KRİTİK ADIM)
+    // Eğer kullanıcının emaili varsa, buluttan en son veriyi çek
+    if (userProgress.email) {
+        await syncWithCloud();
+    }
+
+    // 3. Bulmacaları Yükle
     await loadPuzzles();
 
-    // İlk oyunu arkada hazırla (RENDER ETMEDEN DATA HAZIRLA)
-    // Bu sayede butona basınca bekleme yapmayacak
+    // 4. Oyunu Hazırla
     prepareNextGame('tournament');
     
-    // Butonu aktife al
+    // 5. Butonu Aç
     if(btn) {
         btn.disabled = false;
         btn.innerText = "OYUNA BAŞLA ▶";
         btn.onclick = () => window.forceStartGame();
+    }
+}
+
+// --- CLOUD SYNC FONKSİYONLARI ---
+async function syncWithCloud() {
+    try {
+        // Firestore'dan bu email'e ait veriyi çek
+        const docRef = doc(db, "users_progress", userProgress.email);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const cloudData = docSnap.data();
+            console.log("Buluttan veri alındı:", cloudData);
+            
+            // Buluttaki veri daha güncel kabul edilir, yerel veriyi ez
+            // Ancak tarih farkı varsa kotayı kontrol et
+            if (cloudData.lastPlayedDate !== new Date().toDateString()) {
+                cloudData.dailyQuota = 20;
+                cloudData.hasPlayedDailyChallenge = false;
+                cloudData.lastPlayedDate = new Date().toDateString();
+            }
+
+            userProgress = cloudData;
+            saveProgress(false); // Tekrar buluta yazmaya gerek yok, sadece locale kaydet
+            updateUI();
+            document.querySelector('.user-name').innerText = userProgress.username;
+        } else {
+            // Kullanıcı bulutta yoksa, eldeki veriyi buluta yaz
+            await saveProgress(true);
+        }
+    } catch (error) {
+        console.error("Senkronizasyon hatası:", error);
     }
 }
 
@@ -95,14 +134,12 @@ async function loadPuzzles() {
         const res = await fetch('tum_bulmacalar_SIRALI.json');
         if (res.ok) {
             const data = await res.json();
-            // Tüm seviyeleri tek havuzda topla (Level mantığı için)
             if(data.tier_1) gameData.allPuzzles.push(...data.tier_1);
             if(data.tier_2) gameData.allPuzzles.push(...data.tier_2);
             if(data.tier_3) gameData.allPuzzles.push(...data.tier_3);
             if(data.tier_4) gameData.allPuzzles.push(...data.tier_4);
             if(data.tier_5) gameData.allPuzzles.push(...data.tier_5);
             
-            // Zorları ayır (Günlük mod için)
             if(data.tier_4) gameData.hardPuzzles.push(...data.tier_4);
             if(data.tier_5) gameData.hardPuzzles.push(...data.tier_5);
             console.log("🧩 Bulmacalar yüklendi. Adet:", gameData.allPuzzles.length);
@@ -111,7 +148,6 @@ async function loadPuzzles() {
         }
     } catch (e) {
         console.warn("⚠️ Veri yüklenemedi, yedekler devrede.");
-        // Yedek data ile devam et (Oyun çökmesin)
         gameData.allPuzzles = [getBackupPuzzle(), getBackupPuzzle()];
         gameData.hardPuzzles = [getBackupPuzzle()];
     }
@@ -120,14 +156,13 @@ async function loadPuzzles() {
 // --- OYUN HAZIRLIK (ARKAPLAN) ---
 function prepareNextGame(mode) {
     gameData.mode = mode;
-    gameData.timer = 300; // Süreyi resetle
+    gameData.timer = 300; 
     clearInterval(gameData.timerInterval);
     updateTimerDisplay();
 
     let puzzleToLoad = null;
 
     if (mode === 'daily') {
-        // Günlük Mod Mantığı (Tarihe göre hash)
         if (gameData.hardPuzzles.length > 0) {
             const today = new Date();
             const dateString = `${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}`;
@@ -138,29 +173,24 @@ function prepareNextGame(mode) {
         } else {
             puzzleToLoad = getBackupPuzzle();
         }
-        // Başlık Ayarı
         const startTitle = document.querySelector('#start-overlay div');
         if(startTitle) startTitle.innerText = "GÜNÜN BULMACASI";
         const btn = document.getElementById('main-start-btn');
         if(btn) btn.innerText = "MEYDAN OKU ▶";
 
     } else {
-        // Turnuva Modu Mantığı (Seviyeye göre)
         if (gameData.allPuzzles.length > 0) {
-            // Level 1 -> Index 0
             let idx = (userProgress.level - 1) % gameData.allPuzzles.length;
             puzzleToLoad = gameData.allPuzzles[idx];
         } else {
             puzzleToLoad = getBackupPuzzle();
         }
-        // Başlık Ayarı
         const startTitle = document.querySelector('#start-overlay div');
         if(startTitle) startTitle.innerText = "HAZIR MISIN?";
         const btn = document.getElementById('main-start-btn');
         if(btn) btn.innerText = "OYUNA BAŞLA ▶";
     }
 
-    // Tahtayı Çiz (Görünürde overlay var ama arkada bu çiziliyor)
     renderBoard(puzzleToLoad);
 }
 
@@ -187,28 +217,23 @@ function renderBoard(data) {
         }
         board.appendChild(cell);
     }
-    checkGroups(); // İlk kontrol
+    checkGroups();
 }
 
+// --- KULLANICI ETKİLEŞİMLERİ ---
 
-// --- KULLANICI ETKİLEŞİMLERİ (ACTIONS) ---
-
-// HTML'deki onclick="forceStartGame()" burayı tetikler
 window.forceStartGame = function() {
-    // Kota Kontrolü (Sadece turnuva için)
     if (gameData.mode === 'tournament' && userProgress.dailyQuota <= 0) {
         alert("Günlük kotan doldu şampiyon! Yarın gel. 🛑");
         return;
     }
     
-    // Günlük mod kontrolü
     if (gameData.mode === 'daily' && userProgress.hasPlayedDailyChallenge) {
         alert("Bugünlük görevi zaten tamamladın! 🏆");
         returnToTournament();
         return;
     }
 
-    // Oyunu Başlat
     document.getElementById('start-overlay').style.display = 'none';
     document.querySelectorAll('.overlay-full').forEach(el => el.style.display = 'none');
     
@@ -217,7 +242,7 @@ window.forceStartGame = function() {
     
     if(gameData.mode === 'tournament') {
         userProgress.dailyQuota--;
-        saveProgress();
+        saveProgress(true); // Kotayı buluta kaydet
         updateUI();
     }
     
@@ -225,11 +250,9 @@ window.forceStartGame = function() {
 };
 
 window.startDailyGame = function() {
-    // Günlük moda geçiş yap ve hazırla
     prepareNextGame('daily');
-    // Overlay açık kalmalı ki kullanıcı "Meydan Oku"ya basabilsin
     document.getElementById('start-overlay').style.display = 'flex';
-    document.getElementById('daily-winners-overlay').style.display = 'none'; // Listeyi kapat
+    document.getElementById('daily-winners-overlay').style.display = 'none';
 };
 
 window.returnToTournament = function() {
@@ -239,11 +262,8 @@ window.returnToTournament = function() {
 };
 
 window.nextLevel = function() {
-    // Bir sonraki bölüme geç
     document.getElementById('win-overlay').style.display = 'none';
     prepareNextGame('tournament');
-    // Otomatik başlatmak yerine kullanıcıyı hazır hissettirip başlatabiliriz
-    // Ama hazır hissetmesi için overlay'i açıyoruz
     document.getElementById('start-overlay').style.display = 'flex';
 };
 
@@ -256,7 +276,6 @@ function selectGameCell(cell) {
     cell.classList.add('selected');
     selectedCell = cell;
 
-    // Cross-highlight (Satır ve sütun vurgusu)
     const idx = parseInt(cell.dataset.index); 
     const row = Math.floor(idx / 9); 
     const col = idx % 9;
@@ -282,7 +301,6 @@ window.handleInput = function(val) {
     selectedCell.innerText = val;
     const idx = parseInt(selectedCell.dataset.index);
     
-    // Doğru mu?
     if (String(val) === gameData.solution[idx]) {
         selectedCell.classList.remove('error');
         selectedCell.classList.add('correct');
@@ -297,17 +315,14 @@ function checkGroups() {
     const cells = document.querySelectorAll('.cell'); 
     if(cells.length === 0) return;
     
-    // Grupları tanımla (Satır, Sütun, Kutu)
     const groups = [];
     for(let r=0; r<9; r++) { let row = []; for(let c=0; c<9; c++) row.push(r*9+c); groups.push(row); }
     for(let c=0; c<9; c++) { let col = []; for(let r=0; r<9; r++) col.push(r*9+c); groups.push(col); }
     const boxRoots = [0,3,6,27,30,33,54,57,60];
     boxRoots.forEach(root => { let box = []; for(let r=0; r<3; r++) { for(let c=0; c<3; c++) box.push(root + r*9 + c); } groups.push(box); });
 
-    // Temizle
     cells.forEach(c => c.classList.remove('completed-group'));
 
-    // Kontrol et
     groups.forEach(grp => {
         let isFull = true; 
         let isCorrect = true;
@@ -352,8 +367,6 @@ function handleGameOver() {
     clearInterval(gameData.timerInterval);
     gameData.isPlaying = false;
     alert("SÜRE DOLDU! 😢");
-    
-    // Başa dön
     prepareNextGame('tournament');
     document.getElementById('start-overlay').style.display = 'flex';
 }
@@ -375,7 +388,6 @@ async function checkWin() {
         const winText = document.querySelector('.win-text');
 
         if (gameData.mode === 'tournament') {
-            // Puanlama
             let basePoints = 100;
             let timeBonus = gameData.timer;
             let totalWin = basePoints + timeBonus;
@@ -383,7 +395,7 @@ async function checkWin() {
             userProgress.score += totalWin;
             if (userProgress.level < 500) userProgress.level++;
             
-            // Firebase Kayıt
+            // Firebase Liderlik Tablosuna Kayıt
             saveScoreToFirebase(userProgress.username, userProgress.score);
 
             winTitle.innerText = "HARİKA! 🎉";
@@ -392,12 +404,11 @@ async function checkWin() {
             winBtn.onclick = window.nextLevel;
 
         } else {
-            // Günlük Mod
             userProgress.hasPlayedDailyChallenge = true;
             let timeTaken = 300 - gameData.timer;
             userProgress.dailyBestTime = timeTaken;
 
-            // Firebase Kayıt
+            // Firebase Günlük Tabloya Kayıt
             saveDailyScoreToFirebase(userProgress.username, timeTaken);
 
             winTitle.innerText = "GÜNÜN ŞAMPİYONU! 🏆";
@@ -406,7 +417,7 @@ async function checkWin() {
             winBtn.onclick = window.returnToTournament;
         }
 
-        saveProgress();
+        saveProgress(true); // Puanları buluta da kaydet
         updateUI();
         document.getElementById('win-overlay').style.display = 'flex';
     }
@@ -426,12 +437,9 @@ window.resetBoard = function() {
 
 window.closeOverlays = function() {
     document.querySelectorAll('.overlay-full').forEach(el => el.style.display = 'none');
-    
-    // Eğer oyun başlamamışsa Start ekranı açık kalmalı
     if (!gameData.isPlaying) {
         document.getElementById('start-overlay').style.display = 'flex';
     } else {
-        // Oyun devam ediyorsa pause'u kaldır
         gameData.isPaused = false;
     }
 };
@@ -455,7 +463,6 @@ window.openLeaderboard = async function() {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
             
-            // SADELEŞTİRİLMİŞ HTML (Kişiye özel renk yok, hepsi standart)
             let html = `
                 <div class="rank-item">
                     <div class="rank-left">
@@ -493,7 +500,6 @@ window.openDailyWinners = async function() {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
             
-            // SADELEŞTİRİLMİŞ HTML
             let html = `
                 <div class="rank-item">
                     <div class="rank-left">
@@ -518,7 +524,16 @@ function updateUI() {
     document.querySelector('.score-val').innerText = userProgress.score;
 }
 
-function saveProgress() { localStorage.setItem('sudokai_user', JSON.stringify(userProgress)); }
+// Kaydetme Fonksiyonu: Hem LocalStorage'a hem de (Eğer varsa) Firebase'e yazar
+async function saveProgress(forceCloud = false) { 
+    localStorage.setItem('sudokai_user', JSON.stringify(userProgress));
+    
+    if ((forceCloud || userProgress.email) && userProgress.email) {
+        try {
+            await setDoc(doc(db, "users_progress", userProgress.email), userProgress);
+        } catch(e) { console.error("Buluta yedeklenemedi", e); }
+    }
+}
 
 function getBackupPuzzle() {
     return { 
@@ -533,7 +548,7 @@ function formatTime(seconds) {
     return `${m}:${s}`;
 }
 
-// --- FIREBASE KAYITLARI ---
+// --- FIREBASE LİDERLİK TABLOSU KAYITLARI ---
 async function saveScoreToFirebase(name, score) {
     try {
         const userRef = doc(db, "leaderboard", name);
