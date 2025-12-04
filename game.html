@@ -80,8 +80,11 @@
 
         .start-btn { background: var(--red); color: white; padding: 14px 45px; border-radius: 12px; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer; z-index: 101; position: relative; box-shadow: 0 10px 20px -5px rgba(234, 29, 44, 0.4); transition: transform 0.1s; }
         .start-btn:active { transform: scale(0.95); }
+<<<<<<< HEAD
         .start-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; background: #94a3b8; }
         
+=======
+>>>>>>> 96015ae987e29ca1d57fbb66d6d5110a69e7c82c
         .win-title { font-size: 2rem; font-family: 'Permanent Marker', cursive; color: var(--green-text); margin-bottom: 10px; transform: rotate(-5deg); }
         .win-text { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; text-align: center; line-height: 1.5; white-space: pre-line; }
 
@@ -132,7 +135,11 @@
         </div>
 
         <div class="status-panel">
+<<<<<<< HEAD
             <div class="user-box"><div class="user-name">OYUNCU</div><div class="user-rank"><div class="rank-dot"></div><span>Çaylak</span></div></div>
+=======
+            <div class="user-box"><div class="user-name">ABDURRAHMANNN Z.</div><div class="user-rank"><div class="rank-dot"></div><span>Çaylak</span></div></div>
+>>>>>>> 96015ae987e29ca1d57fbb66d6d5110a69e7c82c
             <div class="stat-item"><span class="stat-label">OYUN SIRAN</span><div class="level-val">1<span class="level-total">/500</span></div></div>
             <div class="stat-item"><span class="stat-label">TOPLAM PUANIN</span><span class="score-val">0</span></div>
             <div class="stat-item" style="border:none"><span class="stat-label">GÜNLÜK KOTAN</span><div class="quota-val">20/20</div></div>
@@ -176,7 +183,11 @@
 
             <div id="start-overlay" class="overlay-full" style="display:flex">
                 <div style="font-size:1.5rem; font-weight:800; color:#0f172a; margin-bottom: 10px;">HAZIR MISIN?</div>
+<<<<<<< HEAD
                 <button id="main-start-btn" class="start-btn" onclick="forceStartGame()" disabled>SİSTEM YÜKLENİYOR...</button>
+=======
+                <button class="start-btn" onclick="forceStartGame()">OYUNA BAŞLA ▶</button>
+>>>>>>> 96015ae987e29ca1d57fbb66d6d5110a69e7c82c
                 <div class="top-stats-bar" style="margin-top: 20px; width: 90%;">
                     <a class="stat-btn trophy" onclick="openLeaderboard()">
                         <span class="icon-trophy"><svg viewBox="0 0 24 24"><path d="M20.2 6.7l-2-2a3 3 0 0 0-4.2 0l-7 7a3 3 0 0 0 0 4.2l2 2a3 3 0 0 0 4.2 0l7-7a3 3 0 0 0 0-4.2zM5 20h14v2H5z"/></svg></span>
@@ -227,16 +238,36 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <script type="module" src="app.js?v=final_fix_v17"></script>
+=======
+    <script type="module" src="app.js?v=final_fix_4"></script>
+>>>>>>> 96015ae987e29ca1d57fbb66d6d5110a69e7c82c
     <script>
         function toggleRules() {
             const container = document.querySelector('.rules-container');
             container.classList.toggle('open');
         }
         
+<<<<<<< HEAD
         window.forceStartGame = function() {
             if (window.startTournamentGame) {
                 window.startTournamentGame();
+=======
+        // GÜVENLİ BAŞLATMA BUTONU
+        window.forceStartGame = function() {
+            // Perdeyi HTML KENDİSİ KALDIRMAZ.
+            // Emri JS'e verir. JS işini bitirince kaldırır.
+            if (window.startTournamentGame) {
+                window.startTournamentGame();
+            } else {
+                console.log("Sistem yükleniyor...");
+                // 1 saniye sonra tekrar dene
+                setTimeout(() => {
+                    if (window.startTournamentGame) window.startTournamentGame();
+                    else alert("Bağlantı yavaş, lütfen sayfayı yenileyin.");
+                }, 1000);
+>>>>>>> 96015ae987e29ca1d57fbb66d6d5110a69e7c82c
             }
         }
     </script>
