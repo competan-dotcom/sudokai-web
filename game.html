@@ -7,56 +7,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Permanent+Marker&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #f8fafc;
-            --primary: #0f172a;
-            --green-text: #15803d; 
-            --green-bg: #dcfce7;
-            --gray-bg: #f1f5f9;
-            --selected: #bfdbfe;
-            --red: #ea1d2c;
-            --error-bg: #fee2e2;
-            --gray: #64748b;
-            --border: #e2e8f0;
-            --btn-shadow: 0 4px 0 #cbd5e1;
-            --btn-active-shadow: 0 0 0 #cbd5e1;
-            --gold: #fbbf24;
-            --silver: #94a3b8;
-            --bronze: #b45309;
+            --bg-body: #f8fafc; --primary: #0f172a; --green-text: #15803d; --green-bg: #dcfce7;
+            --gray-bg: #f1f5f9; --selected: #bfdbfe; --red: #ea1d2c; --error-bg: #fee2e2;
+            --gray: #64748b; --border: #e2e8f0; --btn-shadow: 0 4px 0 #cbd5e1; --btn-active-shadow: 0 0 0 #cbd5e1;
+            --gold: #fbbf24; --silver: #94a3b8; --bronze: #b45309;
         }
-
         * { -webkit-tap-highlight-color: transparent; outline: none; user-select: none; box-sizing: border-box; }
-
         body {
             font-family: 'Outfit', sans-serif; margin: 0; padding: 0; height: 100vh;
             background: linear-gradient(180deg, #f0f6ff 0%, #fff0f5 100%);
             display: flex; justify-content: center; overflow: hidden; color: var(--primary);
         }
-
-        .game-container {
-            width: 100%; max-width: 430px; height: 100%;
-            display: flex; flex-direction: column;
-            padding: 10px 16px; position: relative; gap: 5px;
-        }
-
-        /* 🔒 KİLİTLİ ALANLAR (DOKUNULMAZ) */
+        .game-container { width: 100%; max-width: 430px; height: 100%; display: flex; flex-direction: column; padding: 10px 16px; position: relative; gap: 5px; }
+        
+        /* --- ÜST BLOKLAR --- */
         .brand-panel { display: flex; align-items: center; justify-content: space-between; height: 60px; border-bottom: 1px solid rgba(0,0,0,0.05); flex-shrink: 0; }
         .brand-left { width: 100px; } .brand-right { width: 100px; display: flex; justify-content: flex-end; }
         .mini-icon svg { width: 38px; height: 38px; overflow: visible; }
-        .grid-line { stroke: #000; stroke-width: 2; stroke-linecap: square; }
-        .shape-fill { fill: #000; }
+        .grid-line { stroke: #000; stroke-width: 2; stroke-linecap: square; } .shape-fill { fill: #000; }
         .ghost-num { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 10px; text-anchor: middle; dominant-baseline: central; opacity: 0; animation: twinkle 3s infinite ease-in-out; }
         .fill-red { fill: var(--red); } .fill-green { fill: #15803d; }
-        .delay-1 { animation-delay: 0s; } .delay-2 { animation-delay: 1.5s; }
-        .delay-3 { animation-delay: 0.5s; } .delay-4 { animation-delay: 2.2s; }
-        .delay-5 { animation-delay: 1s; }
+        .delay-1 { animation-delay: 0s; } .delay-2 { animation-delay: 1.5s; } .delay-3 { animation-delay: 0.5s; } .delay-4 { animation-delay: 2.2s; } .delay-5 { animation-delay: 1s; }
         @keyframes twinkle { 0% { opacity: 0; } 20% { opacity: 1; } 40% { opacity: 0; } 100% { opacity: 0; } }
-        .mini-logo { font-family: 'Permanent Marker', cursive; font-size: 2.9rem; margin: 0; color: #000; letter-spacing: 1px; }
-        .mini-logo span { color: var(--red); }
+        .mini-logo { font-family: 'Permanent Marker', cursive; font-size: 2.2rem; margin: 0; color: #000; letter-spacing: 1px; } .mini-logo span { color: var(--red); }
         .daily-challenge-btn { display: flex; flex-direction: column; align-items: flex-end; cursor: pointer; }
         .daily-top-row { display: flex; align-items: center; gap: 3px; }
         .daily-text-std { font-size: 0.65rem; font-weight: 800; color: var(--primary); }
         .daily-icon { width: 18px; height: 10px; background: var(--red); border-radius: 20%; display: flex; align-items: center; justify-content: center; }
         .play-arrow { width: 0; height: 0; border-top: 3px solid transparent; border-bottom: 3px solid transparent; border-left: 5px solid white; margin-left: 2px; }
+
         .status-panel { display: grid; grid-template-columns: 1.4fr 0.7fr 0.7fr 0.7fr 0.7fr; align-items: center; background: #fff; padding: 6px 10px; border-radius: 12px; border: 1px solid var(--border); gap: 4px; flex-shrink: 0; }
         .user-box { display: flex; flex-direction: column; border-right: 1px solid var(--border); padding-right: 4px; overflow: hidden;}
         .user-name { font-weight: 800; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -64,38 +43,17 @@
         .rank-dot { width: 6px; height: 6px; background: var(--green-text); border-radius: 50%; }
         .stat-item { display: flex; flex-direction: column; align-items: center; border-right: 1px solid var(--border); padding: 0 2px; }
         .stat-label { font-size: 0.4rem; font-weight: 700; color: var(--gray); text-transform: uppercase; margin-bottom: 1px; }
-        .level-val { font-size: 0.8rem; font-weight: 800; color: var(--green-text); } 
-        .level-total { font-size: 0.6rem; font-weight: 600; color: var(--gray); }
-        .score-val { font-size: 0.8rem; font-weight: 800; color: var(--primary); }
-        .quota-val { font-size: 0.8rem; font-weight: 800; color: var(--red); }
+        .level-val { font-size: 0.8rem; font-weight: 800; color: var(--green-text); } .level-total { font-size: 0.6rem; font-weight: 600; color: var(--gray); }
+        .score-val { font-size: 0.8rem; font-weight: 800; color: var(--primary); } .quota-val { font-size: 0.8rem; font-weight: 800; color: var(--red); }
         .timer-box { text-align: right; border-left: 1px solid var(--border); padding-left: 4px; }
         .timer-label { font-size: 0.6rem; font-weight: 700; color: var(--primary); display: block; line-height: 1; margin-bottom: 2px;}
         .timer-val { font-size: 0.85rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; color: var(--primary); }
-        .footer { margin-top: auto; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; flex-shrink: 0; }
-        .footer-link { text-decoration: none !important; color: var(--black); font-size: 0.75rem; font-weight: 700; opacity: 0.8; }
-        .date-text { font-size: 0.75rem; font-weight: 700; color: var(--gray); opacity: 0.8; cursor: default; }
-        .footer-brand { font-size: 0.75rem; font-weight: 700; color: var(--gray); opacity: 0.8; text-decoration: none; cursor: pointer; }
-        .footer-group { display: flex; gap: 5px; align-items: center; }
-        /* 🔒 KİLİTLİ ALAN SONU */
 
         /* --- OYUN ALANI --- */
-        .game-area { 
-            flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
-            gap: 8px; position: relative; overflow-y: auto; 
-            padding-top: 5px; 
-            padding-bottom: 20px;
-            -ms-overflow-style: none; scrollbar-width: none;
-        }
+        .game-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 8px; position: relative; overflow-y: auto; padding-top: 5px; padding-bottom: 20px; -ms-overflow-style: none; scrollbar-width: none; }
         .game-area::-webkit-scrollbar { display: none; }
 
-        /* BİLGİ KARTI */
-        .rules-container {
-            position: relative; width: 100%;
-            background: #ffffff; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            overflow: hidden; border: 1px solid #f1f5f9;
-            transition: all 0.3s ease; flex-shrink: 0; z-index: 110;
-        }
+        .rules-container { position: relative; width: 100%; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.3s ease; flex-shrink: 0; z-index: 110; }
         .rules-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; cursor: pointer; background: #fff; user-select: none; }
         .rules-header:active { background-color: #f8fafc; }
         .rules-title { font-size: 0.7rem; font-weight: 800; color: var(--primary); letter-spacing: 0.5px; }
@@ -108,93 +66,46 @@
         .rules-list strong { color: var(--primary); font-weight: 800; }
         .good-luck { margin-top: 8px; font-size: 0.7rem; font-weight: 800; color: var(--red); text-align: right; }
 
-        /* --- STAT BUTONLARI --- */
-        .top-stats-bar { 
-            display: flex; gap: 8px; width: 100%; flex-shrink: 0; margin-bottom: 2px;
-        }
-        .stat-btn {
-            flex: 1; text-decoration: none; 
-            font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
-            color: #000; background: white; 
-            padding: 12px 5px; border-radius: 12px; border: 1px solid var(--border); 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            cursor: pointer; letter-spacing: 0.3px;
-        }
+        .top-stats-bar { display: flex; gap: 8px; width: 100%; flex-shrink: 0; margin-bottom: 2px; }
+        .stat-btn { flex: 1; text-decoration: none; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: #000; background: white; padding: 12px 5px; border-radius: 12px; border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; letter-spacing: 0.3px; }
         .stat-btn span svg { width: 18px; height: 18px; fill: currentColor; }
         .stat-btn:active { transform: scale(0.98); background-color: #f8fafc; }
         .stat-btn:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-        .icon-trophy { color: var(--gold); }
-        .icon-zap { color: var(--red); }
+        .icon-trophy { color: var(--gold); } .icon-zap { color: var(--red); }
 
         /* OVERLAYLER */
-        .overlay-full { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #ffffff; display: none; flex-direction: column; align-items: center; justify-content: center; 
-            z-index: 100; gap: 15px; border-radius: 8px; 
-        }
+        .overlay-full { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; gap: 15px; border-radius: 8px; }
         #start-overlay { display: flex; }
         #leaderboard-overlay, #daily-winners-overlay { z-index: 110; }
 
-        .start-btn { 
-            background: var(--red); color: white; padding: 14px 45px; 
-            border-radius: 12px; font-size: 1.1rem; font-weight: 800; 
-            border: none; cursor: pointer; z-index: 101; position: relative;
-            box-shadow: 0 10px 20px -5px rgba(234, 29, 44, 0.4);
-            transition: transform 0.1s;
-        }
+        .start-btn { background: var(--red); color: white; padding: 14px 45px; border-radius: 12px; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer; z-index: 101; position: relative; box-shadow: 0 10px 20px -5px rgba(234, 29, 44, 0.4); transition: transform 0.1s; }
         .start-btn:active { transform: scale(0.95); }
-
         .win-title { font-size: 2rem; font-family: 'Permanent Marker', cursive; color: var(--green-text); margin-bottom: 10px; transform: rotate(-5deg); }
         .win-text { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; text-align: center; line-height: 1.5; white-space: pre-line; }
 
-        /* LİSTE TASARIMI */
         .overlay-header { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
         .total-count-text { font-size: 0.75rem; color: var(--gray); font-weight: 600; margin-bottom: 15px; letter-spacing: 0.5px; }
-        
         .rank-list { width: 90%; display: flex; flex-direction: column; gap: 8px; max-height: 70%; overflow-y: auto; }
-        .rank-item { 
-            display: flex; align-items: center; justify-content: space-between; 
-            background: #f8fafc; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border);
-        }
+        .rank-item { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border); }
         .rank-left { display: flex; align-items: center; gap: 10px; }
-        .rank-pos { 
-            width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; 
-            display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: var(--gray); 
-        }
-        .rank-pos.gold { background: var(--gold); color: white; }
-        .rank-pos.silver { background: var(--silver); color: white; }
-        .rank-pos.bronze { background: var(--bronze); color: white; }
-        .rank-name { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
-        .rank-score { font-size: 0.8rem; font-weight: 800; color: var(--green-text); }
-        .close-overlay-btn { 
-            margin-top: 20px; background: transparent; border: 1px solid var(--border); 
-            padding: 8px 20px; border-radius: 20px; color: var(--gray); font-weight: 700; font-size: 0.75rem; cursor: pointer; 
-        }
+        .rank-pos { width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: var(--gray); }
+        .rank-pos.gold { background: var(--gold); color: white; } .rank-pos.silver { background: var(--silver); color: white; } .rank-pos.bronze { background: var(--bronze); color: white; }
+        .rank-name { font-size: 0.8rem; font-weight: 700; color: var(--primary); } .rank-score { font-size: 0.8rem; font-weight: 800; color: var(--green-text); }
+        .close-overlay-btn { margin-top: 20px; background: transparent; border: 1px solid var(--border); padding: 8px 20px; border-radius: 20px; color: var(--gray); font-weight: 700; font-size: 0.75rem; cursor: pointer; }
 
-        /* GRID */
         .sudoku-grid { display: grid; grid-template-columns: repeat(9, 1fr); background: var(--primary); gap: 1px; border: 2px solid var(--primary); width: 100%; aspect-ratio: 1/1; max-height: 50vh; flex-shrink: 0; }
         .cell { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 600; color: var(--primary); cursor: pointer; position: relative; transition: background-color 0.2s; }
-        .cell:nth-child(3n) { border-right: 2px solid var(--primary); }
-        .cell:nth-child(9n) { border-right: none; }
+        .cell:nth-child(3n) { border-right: 2px solid var(--primary); } .cell:nth-child(9n) { border-right: none; }
         .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--primary); }
         .cell.initial { color: var(--green-text) !important; font-weight: 800; pointer-events: none; } 
         .cell.correct { color: var(--green-text) !important; font-weight: 800; pointer-events: none; background-color: #fff !important; } 
-        .cell.related { background-color: var(--gray-bg); }
-        .cell.selected { background-color: var(--selected) !important; }
+        .cell.related { background-color: var(--gray-bg); } .cell.selected { background-color: var(--selected) !important; }
         .cell.completed-group { background-color: var(--green-bg) !important; transition: background-color 0.5s ease; } 
         .cell.error { background-color: var(--error-bg) !important; color: var(--red) !important; animation: shake 0.3s; }
         @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 100% { transform: translateX(0); } }
 
-        /* NUMPAD */
         .numpad-container { width: 100%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: auto; }
-        .num-btn { 
-            height: 38px; background: white; border: 1px solid #e2e8f0; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 700; font-size: 1.1rem; color: var(--primary); 
-            cursor: pointer; box-shadow: var(--btn-shadow); transition: all 0.1s ease; position: relative; top: 0;
-        }
+        .num-btn { height: 38px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; color: var(--primary); cursor: pointer; box-shadow: var(--btn-shadow); transition: all 0.1s ease; position: relative; top: 0; }
         .num-btn:active { top: 3px; box-shadow: var(--btn-active-shadow); }
         .num-btn.eraser { background-color: #f1f5f9; color: var(--gray); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         .num-btn.clear-all { grid-column: span 2; background-color: #fee2e2; color: var(--red); border-color: #fecaca; font-size: 0.7rem; font-weight: 800; }
@@ -209,7 +120,6 @@
 <body>
 
     <div class="game-container">
-        
         <div class="brand-panel">
             <div class="brand-left"><div class="mini-icon"><svg viewBox="0 0 60 60"><line x1="20" y1="0" x2="20" y2="60" class="grid-line" /><line x1="40" y1="0" x2="40" y2="60" class="grid-line" /><line x1="0" y1="20" x2="60" y2="20" class="grid-line" /><line x1="0" y1="40" x2="60" y2="40" class="grid-line" /><rect x="4" y="24" width="12" height="12" class="shape-fill" /><circle cx="50" cy="10" r="6" class="shape-fill" /><polygon points="30,44 24,56 36,56" class="shape-fill" /><text x="10" y="10" class="ghost-num fill-green delay-1">4</text><text x="30" y="10" class="ghost-num fill-red delay-2">9</text><text x="30" y="30" class="ghost-num fill-green delay-3">1</text><text x="50" y="30" class="ghost-num fill-red delay-4">7</text><text x="10" y="50" class="ghost-num fill-red delay-5">5</text><text x="50" y="50" class="ghost-num fill-green delay-2">3</text></svg></div></div>
             <h1 class="mini-logo">sudok<span>ai</span></h1>
@@ -283,7 +193,6 @@
             <div id="leaderboard-overlay" class="overlay-full">
                 <div class="overlay-header">GENEL PUAN DURUMU</div>
                 <div id="total-player-count" class="total-count-text">Yükleniyor...</div>
-                
                 <div class="rank-list" id="global-rank-list"></div>
                 <button class="close-overlay-btn" onclick="closeOverlays()">KAPAT</button>
             </div>
@@ -312,22 +221,26 @@
         </div>
     </div>
 
-    <script type="module" src="app.js?v=final_fix_2"></script>
+    <script type="module" src="app.js?v=final_fix_3"></script>
     <script>
         function toggleRules() {
             const container = document.querySelector('.rules-container');
             container.classList.toggle('open');
         }
         
-        // HTML'den çağrılan başlatma fonksiyonu
+        // GÜVENLİ BAŞLATMA BUTONU
         window.forceStartGame = function() {
-            // Perdeyi kaldırma işini app.js'e bırakıyoruz
-            // Böylece tahta kurulmadan oyun başlamaz
+            // Perdeyi HTML KENDİSİ KALDIRMAZ.
+            // Emri JS'e verir. JS işini bitirince kaldırır.
             if (window.startTournamentGame) {
                 window.startTournamentGame();
             } else {
-                console.log("Sistem yükleniyor, lütfen bekleyin...");
-                alert("Oyun motoru hazırlanıyor, lütfen 1-2 saniye sonra tekrar deneyin.");
+                console.log("Sistem yükleniyor...");
+                // 1 saniye sonra tekrar dene
+                setTimeout(() => {
+                    if (window.startTournamentGame) window.startTournamentGame();
+                    else alert("Bağlantı yavaş, lütfen sayfayı yenileyin.");
+                }, 1000);
             }
         }
     </script>
