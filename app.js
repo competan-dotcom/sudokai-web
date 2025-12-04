@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v18.0 - ENGINE REBUILD)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v18.1 - FINAL STABLE)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -79,6 +79,7 @@ async function initSystem() {
     await loadPuzzles();
 
     // İlk oyunu arkada hazırla (RENDER ETMEDEN DATA HAZIRLA)
+    // Bu sayede butona basınca bekleme yapmayacak
     prepareNextGame('tournament');
     
     // Butonu aktife al
@@ -101,7 +102,7 @@ async function loadPuzzles() {
             if(data.tier_4) gameData.allPuzzles.push(...data.tier_4);
             if(data.tier_5) gameData.allPuzzles.push(...data.tier_5);
             
-            // Zorları ayır
+            // Zorları ayır (Günlük mod için)
             if(data.tier_4) gameData.hardPuzzles.push(...data.tier_4);
             if(data.tier_5) gameData.hardPuzzles.push(...data.tier_5);
             console.log("🧩 Bulmacalar yüklendi. Adet:", gameData.allPuzzles.length);
@@ -126,7 +127,7 @@ function prepareNextGame(mode) {
     let puzzleToLoad = null;
 
     if (mode === 'daily') {
-        // Günlük Mod Mantığı
+        // Günlük Mod Mantığı (Tarihe göre hash)
         if (gameData.hardPuzzles.length > 0) {
             const today = new Date();
             const dateString = `${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}`;
@@ -144,7 +145,7 @@ function prepareNextGame(mode) {
         if(btn) btn.innerText = "MEYDAN OKU ▶";
 
     } else {
-        // Turnuva Modu Mantığı
+        // Turnuva Modu Mantığı (Seviyeye göre)
         if (gameData.allPuzzles.length > 0) {
             // Level 1 -> Index 0
             let idx = (userProgress.level - 1) % gameData.allPuzzles.length;
@@ -242,7 +243,7 @@ window.nextLevel = function() {
     document.getElementById('win-overlay').style.display = 'none';
     prepareNextGame('tournament');
     // Otomatik başlatmak yerine kullanıcıyı hazır hissettirip başlatabiliriz
-    // Veya direkt başlatabiliriz. Burada butona basmasını bekliyoruz.
+    // Ama hazır hissetmesi için overlay'i açıyoruz
     document.getElementById('start-overlay').style.display = 'flex';
 };
 
@@ -374,8 +375,7 @@ async function checkWin() {
         const winText = document.querySelector('.win-text');
 
         if (gameData.mode === 'tournament') {
-            // Puanlama: Zorluk (Tier) * 10 + Kalan Süre
-            // Mevcut datada 'difficulty' var mı kontrol et, yoksa level bazlı yap
+            // Puanlama
             let basePoints = 100;
             let timeBonus = gameData.timer;
             let totalWin = basePoints + timeBonus;
@@ -437,10 +437,11 @@ window.closeOverlays = function() {
 };
 
 window.openLeaderboard = async function() {
-    gameData.isPaused = true; // Oyunu dondur
+    gameData.isPaused = true; 
     const list = document.getElementById('global-rank-list');
     const countEl = document.getElementById('total-player-count');
     if(countEl) countEl.innerText = "";
+    
     list.innerHTML = '<div style="text-align:center; padding:10px;">Yükleniyor...</div>';
     document.getElementById('leaderboard-overlay').style.display = 'flex';
 
@@ -449,12 +450,14 @@ window.openLeaderboard = async function() {
         const querySnapshot = await getDocs(q);
         list.innerHTML = ''; 
         let index = 0;
+        
         querySnapshot.forEach((doc) => {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
-            let isMe = u.name === userProgress.username;
+            
+            // SADELEŞTİRİLMİŞ HTML (Kişiye özel renk yok, hepsi standart)
             let html = `
-                <div class="rank-item" style="${isMe ? 'border:1px solid var(--primary); background:#eff6ff' : ''}">
+                <div class="rank-item">
                     <div class="rank-left">
                         <div class="rank-pos ${rankClass}">${index + 1}</div>
                         <div class="rank-name">${u.name}</div>
@@ -464,13 +467,15 @@ window.openLeaderboard = async function() {
             list.innerHTML += html;
             index++;
         });
+        
+        if (index === 0) list.innerHTML = '<div style="text-align:center;">Henüz veri yok.</div>';
     } catch (e) {
         list.innerHTML = '<div style="text-align:center;">Bağlantı hatası.</div>';
     }
 };
 
 window.openDailyWinners = async function() {
-    gameData.isPaused = true; // Oyunu dondur
+    gameData.isPaused = true; 
     const list = document.getElementById('daily-rank-list');
     list.innerHTML = '<div style="text-align:center; padding:10px;">Yükleniyor...</div>';
     document.getElementById('daily-winners-overlay').style.display = 'flex';
@@ -483,9 +488,12 @@ window.openDailyWinners = async function() {
         const querySnapshot = await getDocs(q);
         list.innerHTML = ''; 
         let index = 0;
+        
         querySnapshot.forEach((doc) => {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
+            
+            // SADELEŞTİRİLMİŞ HTML
             let html = `
                 <div class="rank-item">
                     <div class="rank-left">
@@ -513,7 +521,6 @@ function updateUI() {
 function saveProgress() { localStorage.setItem('sudokai_user', JSON.stringify(userProgress)); }
 
 function getBackupPuzzle() {
-    // Veritabanı çekilemezse acil durum camını kır
     return { 
         puzzle: ".4..............3.......97....7...4.....8........2....52.816.9.739245186816......", 
         solution: "348697512297158634165432978952761843471583269683924751524816397739245186816379425" 
