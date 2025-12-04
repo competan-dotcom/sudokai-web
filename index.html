@@ -8,11 +8,7 @@
     <style>
         :root {
             --bg-gradient: linear-gradient(180deg, #f0f6ff 0%, #fff0f5 100%);
-            --red: #ea1d2c;
-            --black: #0f172a;
-            --gray: #64748b;
-            --shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
-            --card-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+            --red: #ea1d2c; --black: #0f172a; --gray: #64748b; --shadow: 0 20px 40px -10px rgba(0,0,0,0.1); --card-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
         }
 
         body {
@@ -30,63 +26,30 @@
         /* --- LOGO ALANI --- */
         .brand-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 0; }
         .grid-icon svg { width: 55px; height: 55px; overflow: visible; margin-bottom: 0px; }
-        .grid-line { stroke: #000; stroke-width: 2; stroke-linecap: square; }
-        .shape-fill { fill: #000; } 
-        
-        .ghost-num {
-            font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 12px;
-            text-anchor: middle; dominant-baseline: central; opacity: 0; 
-            animation: twinkle 3s infinite ease-in-out;
-        }
+        .grid-line { stroke: #000; stroke-width: 2; stroke-linecap: square; } .shape-fill { fill: #000; } 
+        .ghost-num { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 12px; text-anchor: middle; dominant-baseline: central; opacity: 0; animation: twinkle 3s infinite ease-in-out; }
         .fill-red { fill: var(--red); } .fill-green { fill: #15803d; }
-        .delay-1 { animation-delay: 0s; } .delay-2 { animation-delay: 1.5s; }
-        .delay-3 { animation-delay: 0.5s; } .delay-4 { animation-delay: 2.2s; }
-        .delay-5 { animation-delay: 1s; }
+        .delay-1 { animation-delay: 0s; } .delay-2 { animation-delay: 1.5s; } .delay-3 { animation-delay: 0.5s; } .delay-4 { animation-delay: 2.2s; } .delay-5 { animation-delay: 1s; }
         @keyframes twinkle { 0% { opacity: 0; } 20% { opacity: 1; } 40% { opacity: 0; } 100% { opacity: 0; } }
 
-        .brand-name { font-family: 'Permanent Marker', cursive; font-size: 4rem; line-height: 1.1; margin: 0; color: #000; letter-spacing: 1px; }
-        .brand-name span { color: var(--red); }
-        
+        .brand-name { font-family: 'Permanent Marker', cursive; font-size: 4rem; line-height: 1.1; margin: 0; color: #000; letter-spacing: 1px; } .brand-name span { color: var(--red); }
         .slogan-container { width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 10px; gap: 10px; }
         .main-slogan-text { color: #1e293b; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .sub-slogan-text { color: #64748b; font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 500; text-align: center; }
 
         /* --- KART TASARIMI --- */
-        .login-card {
-            background: white; border-radius: 28px; padding: 40px 35px;
-            text-align: center; box-shadow: var(--card-shadow); border: 1px solid #f1f5f9;
-        }
+        .login-card { background: white; border-radius: 28px; padding: 40px 35px; text-align: center; box-shadow: var(--card-shadow); border: 1px solid #f1f5f9; }
+        .card-title { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--black); margin-bottom: 25px; position: relative; display: inline-block; }
+        .card-title::after { content: ''; display: block; width: 60%; height: 4px; background: var(--red); margin: 4px auto 0 auto; border-radius: 2px; opacity: 0.9; }
 
-        .card-title {
-            font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--black);
-            margin-bottom: 25px; position: relative; display: inline-block;
-        }
-        .card-title::after {
-            content: ''; display: block; width: 60%; height: 4px;
-            background: var(--red); margin: 4px auto 0 auto; border-radius: 2px; opacity: 0.9;
-        }
-
-        .google-btn {
-            width: 100%; background: white; border: 2px solid #e2e8f0; border-radius: 16px;
-            padding: 18px; display: flex; align-items: center; justify-content: center; gap: 12px;
-            cursor: pointer; transition: all 0.2s ease;
-            font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--black);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02); text-decoration: none;
-        }
+        .google-btn { width: 100%; background: white; border: 2px solid #e2e8f0; border-radius: 16px; padding: 18px; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: all 0.2s ease; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--black); box-shadow: 0 4px 6px rgba(0,0,0,0.02); text-decoration: none; }
         .google-btn:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
         .google-btn:active { transform: translateY(0) scale(0.98); }
 
-        .helper {
-            margin-top: 22px; font-family: 'Outfit', sans-serif; font-size: 0.8rem;
-            color: var(--gray); font-weight: 600; line-height: 1.4;
-        }
+        .helper { margin-top: 22px; font-family: 'Outfit', sans-serif; font-size: 0.8rem; color: var(--gray); font-weight: 600; line-height: 1.4; }
 
         /* --- FOOTER --- */
-        .footer {
-            margin-top: 0; background: rgba(255,255,255,0.6);
-            border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 12px 20px;
-            display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;
-        }
+        .footer { margin-top: 0; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; }
         .footer-link { text-decoration: none; color: var(--black); font-size: 0.75rem; font-weight: 700; opacity: 0.8; transition: all 0.2s; }
         .footer-link:hover { color: var(--red); opacity: 1; }
         .footer-link.gray-link { color: var(--gray); } 
@@ -101,19 +64,7 @@
         <div class="brand-area">
             <div class="grid-icon">
                 <svg viewBox="0 0 60 60">
-                    <line x1="20" y1="0" x2="20" y2="60" class="grid-line" />
-                    <line x1="40" y1="0" x2="40" y2="60" class="grid-line" />
-                    <line x1="0" y1="20" x2="60" y2="20" class="grid-line" />
-                    <line x1="0" y1="40" x2="60" y2="40" class="grid-line" />
-                    <rect x="4" y="24" width="12" height="12" class="shape-fill" />
-                    <circle cx="50" cy="10" r="6" class="shape-fill" />
-                    <polygon points="30,44 24,56 36,56" class="shape-fill" />
-                    <text x="10" y="10" class="ghost-num fill-green delay-1">4</text>
-                    <text x="30" y="10" class="ghost-num fill-red delay-2">9</text>
-                    <text x="30" y="30" class="ghost-num fill-green delay-3">1</text>
-                    <text x="50" y="30" class="ghost-num fill-red delay-4">7</text>
-                    <text x="10" y="50" class="ghost-num fill-red delay-5">5</text>
-                    <text x="50" y="50" class="ghost-num fill-green delay-2">3</text>
+                    <line x1="20" y1="0" x2="20" y2="60" class="grid-line" /><line x1="40" y1="0" x2="40" y2="60" class="grid-line" /><line x1="0" y1="20" x2="60" y2="20" class="grid-line" /><line x1="0" y1="40" x2="60" y2="40" class="grid-line" /><rect x="4" y="24" width="12" height="12" class="shape-fill" /><circle cx="50" cy="10" r="6" class="shape-fill" /><polygon points="30,44 24,56 36,56" class="shape-fill" /><text x="10" y="10" class="ghost-num fill-green delay-1">4</text><text x="30" y="10" class="ghost-num fill-red delay-2">9</text><text x="30" y="30" class="ghost-num fill-green delay-3">1</text><text x="50" y="30" class="ghost-num fill-red delay-4">7</text><text x="10" y="50" class="ghost-num fill-red delay-5">5</text><text x="50" y="50" class="ghost-num fill-green delay-2">3</text>
                 </svg>
             </div>
             <h1 class="brand-name">sudok<span>ai</span></h1>
@@ -125,12 +76,10 @@
 
         <div class="login-card">
             <div class="card-title">Oyuncu Girişi</div>
-            
             <button id="google-login-btn" class="google-btn">
                 <svg width="22" height="22" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.715H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.623.102-1.22.282-1.77L.957 4.908A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.272C4.672 5.141 6.656 3.58 9 3.58z"/></svg>
                 Google ile Bağlan
             </button>
-            
             <div class="helper">Giriş yaparak puanlarını kaydedebilirsin.</div>
         </div>
 
@@ -142,14 +91,12 @@
             </div>
             <a href="https://ilce-bulmaca.netlify.app/" class="footer-link" target="_blank">İlçeBulmaca</a>
         </div>
-
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // SENİN FIREBASE AYARLARIN
         const firebaseConfig = {
           apiKey: "AIzaSyDrzD5FkOCsNUFeiuvzeHEjiNvFYc5B0Bo",
           authDomain: "sudokai-ac7be.firebaseapp.com",
@@ -163,47 +110,24 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
-
         const loginBtn = document.getElementById('google-login-btn');
 
-        // Butona tıklanınca Google girişi başlat
         loginBtn.addEventListener('click', () => {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    // Giriş başarılı! Kullanıcıyı kaydet
-                    const user = result.user;
-                    
-                    // Kullanıcı bilgilerini LocalStorage'a da atalım (oyun sayfası için)
-                    let userData = JSON.parse(localStorage.getItem('sudokai_user')) || {};
-                    userData.username = user.displayName || user.email.split('@')[0];
-                    userData.email = user.email;
-                    userData.uid = user.uid; // Benzersiz ID
-                    
-                    // Eğer yeni kullanıcıysa default değerleri ata
-                    if(!userData.level) {
-                        userData.level = 1;
-                        userData.score = 0;
-                        userData.dailyQuota = 20;
-                        userData.lastPlayedDate = new Date().toDateString();
-                    }
-                    
-                    localStorage.setItem('sudokai_user', JSON.stringify(userData));
-
-                    // Oyuna yönlendir
-                    window.location.href = "game.html";
-                })
-                .catch((error) => {
-                    console.error("Giriş Hatası:", error);
-                    alert("Giriş yapılamadı: " + error.message);
-                });
+            signInWithPopup(auth, provider).then((result) => {
+                const user = result.user;
+                let userData = JSON.parse(localStorage.getItem('sudokai_user')) || {};
+                userData.username = user.displayName || user.email.split('@')[0];
+                userData.email = user.email;
+                if(!userData.level) {
+                    userData.level = 1; userData.score = 0; userData.dailyQuota = 20;
+                    userData.lastPlayedDate = new Date().toDateString();
+                }
+                localStorage.setItem('sudokai_user', JSON.stringify(userData));
+                window.location.href = "game.html";
+            }).catch((error) => { alert("Giriş yapılamadı: " + error.message); });
         });
 
-        // Eğer zaten giriş yapmışsa direkt yönlendir (Opsiyonel, istersen kaldırabilirsin)
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // window.location.href = "game.html"; // Kullanıcıyı baymasın diye kapalı tutuyorum, butona basınca gitsin.
-            }
-        });
+        onAuthStateChanged(auth, (user) => { if (user) { /* İsteğe bağlı: Otomatik yönlendirme */ } });
     </script>
 
 </body>

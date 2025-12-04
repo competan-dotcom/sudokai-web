@@ -80,9 +80,12 @@
 
         .start-btn { background: var(--red); color: white; padding: 14px 45px; border-radius: 12px; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer; z-index: 101; position: relative; box-shadow: 0 10px 20px -5px rgba(234, 29, 44, 0.4); transition: transform 0.1s; }
         .start-btn:active { transform: scale(0.95); }
+        .start-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; background: #94a3b8; }
+        
         .win-title { font-size: 2rem; font-family: 'Permanent Marker', cursive; color: var(--green-text); margin-bottom: 10px; transform: rotate(-5deg); }
         .win-text { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; text-align: center; line-height: 1.5; white-space: pre-line; }
 
+        /* LİSTE TASARIMI */
         .overlay-header { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
         .total-count-text { font-size: 0.75rem; color: var(--gray); font-weight: 600; margin-bottom: 15px; letter-spacing: 0.5px; }
         .rank-list { width: 90%; display: flex; flex-direction: column; gap: 8px; max-height: 70%; overflow-y: auto; }
@@ -93,6 +96,7 @@
         .rank-name { font-size: 0.8rem; font-weight: 700; color: var(--primary); } .rank-score { font-size: 0.8rem; font-weight: 800; color: var(--green-text); }
         .close-overlay-btn { margin-top: 20px; background: transparent; border: 1px solid var(--border); padding: 8px 20px; border-radius: 20px; color: var(--gray); font-weight: 700; font-size: 0.75rem; cursor: pointer; }
 
+        /* GRID */
         .sudoku-grid { display: grid; grid-template-columns: repeat(9, 1fr); background: var(--primary); gap: 1px; border: 2px solid var(--primary); width: 100%; aspect-ratio: 1/1; max-height: 50vh; flex-shrink: 0; }
         .cell { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 600; color: var(--primary); cursor: pointer; position: relative; transition: background-color 0.2s; }
         .cell:nth-child(3n) { border-right: 2px solid var(--primary); } .cell:nth-child(9n) { border-right: none; }
@@ -104,6 +108,7 @@
         .cell.error { background-color: var(--error-bg) !important; color: var(--red) !important; animation: shake 0.3s; }
         @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 100% { transform: translateX(0); } }
 
+        /* NUMPAD */
         .numpad-container { width: 100%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: auto; }
         .num-btn { height: 38px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; color: var(--primary); cursor: pointer; box-shadow: var(--btn-shadow); transition: all 0.1s ease; position: relative; top: 0; }
         .num-btn:active { top: 3px; box-shadow: var(--btn-active-shadow); }
@@ -127,7 +132,7 @@
         </div>
 
         <div class="status-panel">
-            <div class="user-box"><div class="user-name">ABDURRAHMANNN Z.</div><div class="user-rank"><div class="rank-dot"></div><span>Çaylak</span></div></div>
+            <div class="user-box"><div class="user-name">OYUNCU</div><div class="user-rank"><div class="rank-dot"></div><span>Çaylak</span></div></div>
             <div class="stat-item"><span class="stat-label">OYUN SIRAN</span><div class="level-val">1<span class="level-total">/500</span></div></div>
             <div class="stat-item"><span class="stat-label">TOPLAM PUANIN</span><span class="score-val">0</span></div>
             <div class="stat-item" style="border:none"><span class="stat-label">GÜNLÜK KOTAN</span><div class="quota-val">20/20</div></div>
@@ -171,7 +176,7 @@
 
             <div id="start-overlay" class="overlay-full" style="display:flex">
                 <div style="font-size:1.5rem; font-weight:800; color:#0f172a; margin-bottom: 10px;">HAZIR MISIN?</div>
-                <button class="start-btn" onclick="forceStartGame()">OYUNA BAŞLA ▶</button>
+                <button id="main-start-btn" class="start-btn" onclick="forceStartGame()" disabled>SİSTEM YÜKLENİYOR...</button>
                 <div class="top-stats-bar" style="margin-top: 20px; width: 90%;">
                     <a class="stat-btn trophy" onclick="openLeaderboard()">
                         <span class="icon-trophy"><svg viewBox="0 0 24 24"><path d="M20.2 6.7l-2-2a3 3 0 0 0-4.2 0l-7 7a3 3 0 0 0 0 4.2l2 2a3 3 0 0 0 4.2 0l7-7a3 3 0 0 0 0-4.2zM5 20h14v2H5z"/></svg></span>
@@ -193,6 +198,7 @@
             <div id="leaderboard-overlay" class="overlay-full">
                 <div class="overlay-header">GENEL PUAN DURUMU</div>
                 <div id="total-player-count" class="total-count-text">Yükleniyor...</div>
+                
                 <div class="rank-list" id="global-rank-list"></div>
                 <button class="close-overlay-btn" onclick="closeOverlays()">KAPAT</button>
             </div>
@@ -221,30 +227,18 @@
         </div>
     </div>
 
-<script type="module" src="app.js?v=final_fix_4"></script>
+    <script type="module" src="app.js?v=final_fix_v17"></script>
     <script>
         function toggleRules() {
             const container = document.querySelector('.rules-container');
             container.classList.toggle('open');
         }
         
-        // GÜVENLİ BAŞLATMA BUTONU
         window.forceStartGame = function() {
-            // Perdeyi HTML KENDİSİ KALDIRMAZ.
-            // Emri JS'e verir. JS işini bitirince kaldırır.
             if (window.startTournamentGame) {
                 window.startTournamentGame();
-            } else {
-                console.log("Sistem yükleniyor...");
-                // 1 saniye sonra tekrar dene
-                setTimeout(() => {
-                    if (window.startTournamentGame) window.startTournamentGame();
-                    else alert("Bağlantı yavaş, lütfen sayfayı yenileyin.");
-                }, 1000);
             }
         }
     </script>
-
-    
 </body>
 </html>
