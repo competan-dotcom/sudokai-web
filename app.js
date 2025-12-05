@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v22.0 - RANK & LIST FINAL)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v23.0 - FORCE UPDATE)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -75,16 +75,14 @@ function getRankTitle(level) {
 
 // --- VERİ YÜKLEME VE İLK KURULUM ---
 async function initSystem() {
-    // 1. Önce UI'ı güncelle
     updateUI();
     
-    // Günlük İkon Rengi Ayarla
     const sirenEl = document.getElementById('daily-siren');
     if(sirenEl) {
         if(userProgress.hasPlayedDailyChallenge) {
-            sirenEl.className = 'siren-light red'; // Oynanmışsa kırmızı
+            sirenEl.className = 'siren-light red'; 
         } else {
-            sirenEl.className = 'siren-light green'; // Oynanmamışsa yeşil
+            sirenEl.className = 'siren-light green'; 
         }
     }
     
@@ -108,18 +106,13 @@ async function initSystem() {
         btn.innerText = "VERİLER EŞİTLENİYOR...";
     }
 
-    // 2. BULUT SENKRONİZASYONU
     if (userProgress.email) {
         await syncWithCloud();
     }
 
-    // 3. Bulmacaları Yükle
     await loadPuzzles();
-
-    // 4. Oyunu Hazırla
     prepareNextGame('tournament');
     
-    // 5. Butonu Aç
     if(btn) {
         btn.disabled = false;
         btn.innerText = "OYUNA BAŞLA ▶";
@@ -135,7 +128,6 @@ async function syncWithCloud() {
 
         if (docSnap.exists()) {
             const cloudData = docSnap.data();
-            console.log("Buluttan veri alındı:", cloudData);
             
             if (cloudData.lastPlayedDate !== new Date().toDateString()) {
                 cloudData.dailyQuota = 20;
@@ -147,13 +139,11 @@ async function syncWithCloud() {
             saveProgress(false); 
             updateUI();
             
-            // İkonu tekrar kontrol et (Cloud'dan true gelmiş olabilir)
             const sirenEl = document.getElementById('daily-siren');
             if(sirenEl) {
                 sirenEl.className = userProgress.hasPlayedDailyChallenge ? 'siren-light red' : 'siren-light green';
             }
             
-            // İsim güncellemesi 
             let dispName = userProgress.username;
             if (dispName.includes(' ')) {
                 let parts = dispName.split(' ');
@@ -186,7 +176,6 @@ async function loadPuzzles() {
             
             if(data.tier_4) gameData.hardPuzzles.push(...data.tier_4);
             if(data.tier_5) gameData.hardPuzzles.push(...data.tier_5);
-            console.log("🧩 Bulmacalar yüklendi. Adet:", gameData.allPuzzles.length);
         } else {
             throw new Error("JSON hatası");
         }
@@ -197,7 +186,6 @@ async function loadPuzzles() {
     }
 }
 
-// --- OYUN HAZIRLIK (ARKAPLAN) ---
 function prepareNextGame(mode) {
     gameData.mode = mode;
     gameData.timer = 300; 
@@ -264,8 +252,6 @@ function renderBoard(data) {
     checkGroups();
 }
 
-// --- KULLANICI ETKİLEŞİMLERİ ---
-
 window.forceStartGame = function() {
     if (gameData.mode === 'tournament' && userProgress.dailyQuota <= 0) {
         window.showSystemAlert("KOTA DOLDU 🛑", "Bugünlük enerjin bitti şampiyon! Yarın tekrar gel.");
@@ -310,8 +296,6 @@ window.nextLevel = function() {
     prepareNextGame('tournament');
     document.getElementById('start-overlay').style.display = 'flex';
 };
-
-// --- OYUN MANTIĞI ---
 
 function selectGameCell(cell) {
     if (!gameData.isPlaying || gameData.isPaused) return;
@@ -358,7 +342,6 @@ window.handleInput = function(val) {
 function checkGroups() {
     const cells = document.querySelectorAll('.cell'); 
     if(cells.length === 0) return;
-    
     const groups = [];
     for(let r=0; r<9; r++) { let row = []; for(let c=0; c<9; c++) row.push(r*9+c); groups.push(row); }
     for(let c=0; c<9; c++) { let col = []; for(let r=0; r<9; r++) col.push(r*9+c); groups.push(col); }
@@ -374,33 +357,25 @@ function checkGroups() {
             if (!cells[idx].innerText) isFull = false;
             if (cells[idx].innerText !== gameData.solution[idx]) isCorrect = false;
         });
-        
         if (isFull && isCorrect) {
             grp.forEach(idx => cells[idx].classList.add('completed-group'));
         }
     });
 }
 
-// --- SAYAÇ (TIMER) ---
 function startTimer() {
     if (gameData.timerInterval) clearInterval(gameData.timerInterval);
-    
     gameData.timerInterval = setInterval(() => {
         if (!gameData.isPlaying || gameData.isPaused) return;
-
         gameData.timer--;
         updateTimerDisplay();
-
-        if (gameData.timer <= 0) {
-            handleGameOver();
-        }
+        if (gameData.timer <= 0) { handleGameOver(); }
     }, 1000);
 }
 
 function updateTimerDisplay() {
     const timerEl = document.querySelector('.timer-val');
     if(!timerEl) return;
-    
     let t = gameData.timer < 0 ? 0 : gameData.timer;
     let m = Math.floor(t / 60).toString().padStart(2, '0');
     let s = (t % 60).toString().padStart(2, '0');
@@ -415,7 +390,6 @@ function handleGameOver() {
     document.getElementById('start-overlay').style.display = 'flex';
 }
 
-// --- KAZANMA DURUMU ---
 async function checkWin() {
     const cells = document.querySelectorAll('.cell');
     let isComplete = true;
@@ -431,7 +405,6 @@ async function checkWin() {
         const winTitle = document.querySelector('.win-title');
         const winText = document.querySelector('.win-text');
 
-        // ŞUANKİ RÜTBEYİ AL
         let currentRank = getRankTitle(userProgress.level);
 
         if (gameData.mode === 'tournament') {
@@ -442,7 +415,6 @@ async function checkWin() {
             userProgress.score += totalWin;
             if (userProgress.level < 500) userProgress.level++;
             
-            // Firebase'e Rütbe ile Kayıt
             saveScoreToFirebase(userProgress.username, userProgress.score, currentRank);
 
             winTitle.innerText = "Tebrikler! 🎉";
@@ -452,14 +424,12 @@ async function checkWin() {
 
         } else {
             userProgress.hasPlayedDailyChallenge = true;
-            // İkonu kırmızı yap
             const sirenEl = document.getElementById('daily-siren');
             if(sirenEl) sirenEl.className = 'siren-light red';
 
             let timeTaken = 300 - gameData.timer;
             userProgress.dailyBestTime = timeTaken;
 
-            // Firebase'e Rütbe ile Kayıt
             saveDailyScoreToFirebase(userProgress.username, timeTaken, currentRank);
 
             winTitle.innerText = "Tebrikler! 🏆";
@@ -473,8 +443,6 @@ async function checkWin() {
         document.getElementById('win-overlay').style.display = 'flex';
     }
 }
-
-// --- ARAÇLAR & OVERLAY ---
 
 window.resetBoard = function() {
     if(!confirm("Tüm hamleleri silmek istediğine emin misin?")) return;
@@ -507,8 +475,6 @@ window.openLeaderboard = async function() {
     try {
         const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(20));
         const querySnapshot = await getDocs(q);
-        
-        // TOPLAM OYUNCU SAYISI
         if(countEl) countEl.innerText = `Toplam Oyuncu: ${querySnapshot.size}`;
 
         list.innerHTML = ''; 
@@ -526,10 +492,8 @@ window.openLeaderboard = async function() {
                 dispName = `${dispName} X.`;
             }
             
-            // RÜTBE FORMATLAMA (KÜÇÜK HARF ve KIRMIZI)
+            // RÜTBE FORMATI
             let userRank = u.rank ? ` <span style="color:#ea1d2c; font-weight:700; font-size:0.7rem;">(${u.rank.toLowerCase()})</span>` : '';
-
-            // PUAN FORMATLAMA (BİNLİK AYIRACI + P YOK)
             let formattedScore = u.score ? u.score.toLocaleString('tr-TR') : 0;
 
             let html = `
@@ -565,8 +529,6 @@ window.openDailyWinners = async function() {
     try {
         const q = query(collection(db, collectionName), orderBy("time", "asc"), limit(20));
         const querySnapshot = await getDocs(q);
-        
-        // TOPLAM ÇÖZEN SAYISI
         if(countEl) countEl.innerText = `Toplam Çözen: ${querySnapshot.size}`;
 
         list.innerHTML = ''; 
@@ -575,7 +537,6 @@ window.openDailyWinners = async function() {
         querySnapshot.forEach((doc) => {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
-            
             let dispName = u.name;
             if (dispName.includes(' ')) {
                 let parts = dispName.split(' ');
@@ -583,7 +544,6 @@ window.openDailyWinners = async function() {
             } else {
                 dispName = `${dispName} X.`;
             }
-            
             let userRank = u.rank ? ` <span style="color:#ea1d2c; font-weight:700; font-size:0.7rem;">(${u.rank.toLowerCase()})</span>` : '';
 
             let html = `
@@ -612,32 +572,26 @@ window.showSystemAlert = function(title, msg) {
 function updateUI() {
     document.querySelector('.level-val').innerHTML = `${userProgress.level}<span class="level-total">/500</span>`;
     document.querySelector('.quota-val').innerText = `${userProgress.dailyQuota}/20`;
-    // PUAN FORMATLAMA
     document.querySelector('.score-val').innerText = userProgress.score.toLocaleString('tr-TR');
     
-    // RÜTBE GÜNCELLEME (KÜÇÜK HARF)
+    // RÜTBE GÜNCELLEME (Üst Panel)
     let currentRank = getRankTitle(userProgress.level);
     let rankEl = document.querySelector('.user-rank');
     if(rankEl) {
-        rankEl.innerHTML = `<div class="rank-dot"></div><span>${currentRank}</span>`; // Zaten fonksiyondan küçük dönüyor
+        // Burada da kırmızı ve küçük harf olacak
+        rankEl.innerHTML = `<span style="color:#ea1d2c; font-weight:800; font-size:0.6rem;">(${currentRank.toLowerCase()})</span>`;
     }
 }
 
 async function saveProgress(forceCloud = false) { 
     localStorage.setItem('sudokai_user', JSON.stringify(userProgress));
-    
     if ((forceCloud || userProgress.email) && userProgress.email) {
-        try {
-            await setDoc(doc(db, "users_progress", userProgress.email), userProgress);
-        } catch(e) { console.error("Buluta yedeklenemedi", e); }
+        try { await setDoc(doc(db, "users_progress", userProgress.email), userProgress); } catch(e) { console.error("Buluta yedeklenemedi", e); }
     }
 }
 
 function getBackupPuzzle() {
-    return { 
-        puzzle: ".4..............3.......97....7...4.....8........2....52.816.9.739245186816......", 
-        solution: "348697512297158634165432978952761843471583269683924751524816397739245186816379425" 
-    };
+    return { puzzle: ".4..............3.......97....7...4.....8........2....52.816.9.739245186816......", solution: "348697512297158634165432978952761843471583269683924751524816397739245186816379425" };
 }
 
 function formatTime(seconds) {
@@ -646,12 +600,10 @@ function formatTime(seconds) {
     return `${m}:${s}`;
 }
 
-// --- FIREBASE LİDERLİK TABLOSU KAYITLARI ---
 async function saveScoreToFirebase(name, score, rank) {
     try {
         const docId = userProgress.email ? userProgress.email : name;
         const userRef = doc(db, "leaderboard", docId);
-        
         await setDoc(userRef, { name: name, score: score, rank: rank, lastUpdate: new Date() }, { merge: true });
     } catch (e) { console.error("Skor hatası", e); }
 }
@@ -661,7 +613,6 @@ async function saveDailyScoreToFirebase(name, timeSeconds, rank) {
         const today = new Date().toISOString().slice(0,10);
         const collectionName = "daily_winners_" + today;
         const docId = userProgress.email ? userProgress.email : name;
-        
         const userRef = doc(db, collectionName, docId);
         await setDoc(userRef, { name: name, time: timeSeconds, rank: rank });
     } catch (e) { console.error("Günlük skor hatası", e); }
