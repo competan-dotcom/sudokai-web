@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v27.0 - MULTI BACKUP & LOOP SAFE)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v28.0 - FINAL TOGGLE & NO-PAUSE)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -185,16 +185,64 @@ async function loadPuzzles() {
             if(data.tier_4) gameData.hardPuzzles.push(...data.tier_4);
             if(data.tier_5) gameData.hardPuzzles.push(...data.tier_5);
             
+            // --- 🛡️ TERMINATOR VALIDATOR BAŞLANGIÇ ---
+            let badPuzzles = [];
+            const hasDuplicates = (arr) => {
+                const nums = arr.filter(n => n !== '0' && n !== '.');
+                return new Set(nums).size !== nums.length;
+            };
+
+            gameData.allPuzzles.forEach(p => {
+                let isFaulty = false;
+                let s = p.solution;
+                
+                // 1. İpucu vs Çözüm Uyumu
+                for(let i=0; i<81; i++) {
+                    if (p.puzzle[i] !== '0' && p.puzzle[i] !== '.' && p.puzzle[i] !== s[i]) {
+                        console.error(`🚨 ÇAKIŞMA (ID: ${p.id}): İpucu '${p.puzzle[i]}' çözüm '${s[i]}' ile uyuşmuyor.`);
+                        isFaulty = true;
+                    }
+                }
+                // 2. Satır Kontrolü
+                for (let r = 0; r < 9; r++) {
+                    let row = []; for (let c = 0; c < 9; c++) row.push(s[r * 9 + c]);
+                    if (hasDuplicates(row)) { console.error(`🚨 SATIR HATASI (ID: ${p.id})`); isFaulty = true; }
+                }
+                // 3. Sütun Kontrolü
+                for (let c = 0; c < 9; c++) {
+                    let col = []; for (let r = 0; r < 9; r++) col.push(s[r * 9 + c]);
+                    if (hasDuplicates(col)) { console.error(`🚨 SÜTUN HATASI (ID: ${p.id})`); isFaulty = true; }
+                }
+                // 4. Kutu Kontrolü
+                for (let box = 0; box < 9; box++) {
+                    let block = [];
+                    let startRow = Math.floor(box / 3) * 3;
+                    let startCol = (box % 3) * 3;
+                    for (let r = 0; r < 3; r++) {
+                        for (let c = 0; c < 3; c++) block.push(s[(startRow + r) * 9 + (startCol + c)]);
+                    }
+                    if (hasDuplicates(block)) { console.error(`🚨 KUTU HATASI (ID: ${p.id})`); isFaulty = true; }
+                }
+
+                if (isFaulty) badPuzzles.push(p.id);
+            });
+
+            if (badPuzzles.length > 0) {
+                alert(`DİKKAT! ${badPuzzles.length} adet bozuk bulmaca tespit edildi. Konsola bak.`);
+            } else {
+                console.log("✅ TERMINATOR: Tüm bulmacalar matematiksel olarak doğrulandı. (Satır/Sütun/Kutu)");
+            }
+            // --- 🛡️ TERMINATOR VALIDATOR BİTİŞ ---
+
             console.log("🧩 Bulmacalar başarıyla yüklendi. Adet:", gameData.allPuzzles.length);
         } else {
             throw new Error("JSON hatası");
         }
     } catch (e) {
         console.warn("⚠️ Veri yüklenemedi, ACİL DURUM YEDEKLERİ devrede.");
-        // JSON Okunamazsa 5 tane farklı yedek bulmacayı yükle
         const backups = getBackupPuzzlesList();
-        gameData.allPuzzles = [...backups]; // Turnuva için yedekler
-        gameData.hardPuzzles = [...backups]; // Günlük için yedekler
+        gameData.allPuzzles = [...backups]; 
+        gameData.hardPuzzles = [...backups]; 
     }
 }
 
@@ -214,11 +262,9 @@ function prepareNextGame(mode) {
             let hash = 0;
             for (let i = 0; i < dateString.length; i++) hash = ((hash << 5) - hash) + dateString.charCodeAt(i) | 0;
             
-            // MODÜLO (%): Listede kaç soru varsa ona göre kalanı alır, asla taşmaz.
             const uniqueIndex = Math.abs(hash) % gameData.hardPuzzles.length;
             puzzleToLoad = gameData.hardPuzzles[uniqueIndex];
         } else {
-            // Eğer hardPuzzles boşsa (çok düşük ihtimal), ilk yedeği al
             puzzleToLoad = getBackupPuzzlesList()[0];
         }
         const startTitle = document.querySelector('#start-overlay div');
@@ -228,7 +274,6 @@ function prepareNextGame(mode) {
 
     } else {
         if (gameData.allPuzzles.length > 0) {
-            // MODÜLO (%): Level 501 olursan, (501-1) % 500 = 0 olur. Yani başa döner. Çakılmaz.
             let idx = (userProgress.level - 1) % gameData.allPuzzles.length;
             puzzleToLoad = gameData.allPuzzles[idx];
         } else {
@@ -485,13 +530,24 @@ window.closeOverlays = function() {
 };
 
 window.openLeaderboard = async function() {
-    gameData.isPaused = true; 
+    // 1. TOGGLE: Zaten açıksa kapat ve fonksiyondan çık
+    const overlay = document.getElementById('leaderboard-overlay');
+    if (overlay.style.display === 'flex') {
+        overlay.style.display = 'none';
+        return;
+    }
+
+    // Diğer overlay açıksa onu kapat (Çakışma olmasın)
+    document.getElementById('daily-winners-overlay').style.display = 'none';
+    
+    // NOT: gameData.isPaused = true; KODUNU KALDIRDIK. SAYAÇ DEVAM EDER!
+
     const list = document.getElementById('global-rank-list');
     const countEl = document.getElementById('total-player-count');
     if(countEl) countEl.innerText = "Yükleniyor...";
     
     list.innerHTML = '<div style="text-align:center; padding:10px;">Yükleniyor...</div>';
-    document.getElementById('leaderboard-overlay').style.display = 'flex';
+    overlay.style.display = 'flex';
 
     try {
         const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(20));
@@ -535,13 +591,24 @@ window.openLeaderboard = async function() {
 };
 
 window.openDailyWinners = async function() {
-    gameData.isPaused = true; 
+    // 1. TOGGLE: Zaten açıksa kapat ve çık
+    const overlay = document.getElementById('daily-winners-overlay');
+    if (overlay.style.display === 'flex') {
+        overlay.style.display = 'none';
+        return;
+    }
+
+    // Diğer overlay açıksa kapat
+    document.getElementById('leaderboard-overlay').style.display = 'none';
+    
+    // NOT: gameData.isPaused = true; KODUNU KALDIRDIK. SAYAÇ DEVAM EDER!
+
     const list = document.getElementById('daily-rank-list');
     const countEl = document.getElementById('daily-player-count');
     if(countEl) countEl.innerText = "Yükleniyor...";
 
     list.innerHTML = '<div style="text-align:center; padding:10px;">Yükleniyor...</div>';
-    document.getElementById('daily-winners-overlay').style.display = 'flex';
+    overlay.style.display = 'flex';
     
     const today = new Date().toISOString().slice(0,10);
     const collectionName = "daily_winners_" + today;

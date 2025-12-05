@@ -363,7 +363,17 @@
             gap: 15px; 
         }
         #start-overlay { background: #fff; } 
-        #leaderboard-overlay, #daily-winners-overlay { z-index: 110; justify-content: flex-start; padding-top: 40px; } /* Listeler yukarıdan başlasın */
+ 
+        
+        #leaderboard-overlay, #daily-winners-overlay { 
+        z-index: 110; 
+        justify-content: flex-start; 
+        padding-top: 40px; 
+        /* SAYDAMLIĞI KAPATTIK: Tam örtücü açık gri renk */
+        background-color: #f1f5f9 !important; 
+        opacity: 1;
+        }
+
 
         .start-btn { background: var(--red); color: white; padding: 14px 45px; border-radius: 12px; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer; z-index: 101; position: relative; box-shadow: 0 10px 20px -5px rgba(234, 29, 44, 0.4); transition: transform 0.1s; }
         .start-btn:active { transform: scale(0.95); }
