@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v21.0 - LAYOUT & LIST REFACTOR)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v22.0 - RANK & LIST FINAL)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -508,7 +508,7 @@ window.openLeaderboard = async function() {
         const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(20));
         const querySnapshot = await getDocs(q);
         
-        // TOPLAM OYUNCU SAYISI (Şimdilik listedeki kişi sayısı)
+        // TOPLAM OYUNCU SAYISI
         if(countEl) countEl.innerText = `Toplam Oyuncu: ${querySnapshot.size}`;
 
         list.innerHTML = ''; 
