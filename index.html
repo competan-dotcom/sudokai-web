@@ -22,44 +22,46 @@
         .main-slogan-text { color: #1e293b; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .sub-slogan-text { color: #64748b; font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 500; text-align: center; }
         
-        /* 1. KUTU AYARLARI (GÜNCELLENDİ) */
-.login-card { 
-    background: white; 
-    border-radius: 28px; 
-    padding: 40px 35px; 
-    text-align: center; 
-    box-shadow: var(--card-shadow); 
-    border: 1px solid #f1f5f9;
-    
-    /* Işık efekti için zorunlu eklemeler: */
-    position: relative; 
-    overflow: hidden; 
+/* --- MODERN ANİME ÇERÇEVE EFEKTİ --- */
+
+/* 1. Açıyı tanımlıyoruz (Dönüş için gerekli motor) */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 
-/* 2. PROJEKTÖR IŞIK EFEKTİ (YENİ) */
-.login-card::after {
-    content: '';
-    position: absolute;
-    top: 0;       /* En üstte duracak */
-    left: -100%;  /* Başlangıçta solda gizli */
-    width: 100%;
-    height: 4px;  /* Işığın kalınlığı */
+/* 2. Kartın Kendisi */
+.login-card {
+    position: relative;
+    border-radius: 28px;
+    padding: 40px 35px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
     
-    /* Kırmızı neon gradient */
-    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    /* Eski border'ı kaldırıyoruz, yerini sihirli border alıyor */
+    border: 3px solid transparent; 
     
-    /* Aşağıya süzülen kırmızı yansıma (Glow) */
-    box-shadow: 0 5px 15px rgba(234, 29, 44, 0.6);
+    /* ARKA PLAN SİHRİ: */
+    background: 
+        /* 1. Katman: İçerideki Beyaz Zemin */
+        linear-gradient(#fff, #fff) padding-box, 
+        
+        /* 2. Katman: Dönen Enerji Çerçevesi (Kırmızı kuyruklu yıldız gibi) */
+        conic-gradient(from var(--angle), transparent 25%, var(--red), transparent 90%) border-box;
+        
+    /* Anime Hızı: 3 saniyede bir tam tur (linear = takılmadan) */
+    animation: rotate-border 3s linear infinite;
     
-    /* Animasyon döngüsü */
-    animation: projector-scan 3.5s infinite ease-in-out;
+    /* Diğer ayarlar */
+    z-index: 1;
 }
 
-/* 3. ANİMASYON KEYFRAMES (YENİ) */
-@keyframes projector-scan {
-    0% { left: -100%; }      /* Ekranın solundan gir */
-    50% { left: 100%; }      /* Sağa kadar git */
-    100% { left: 100%; }     /* Biraz bekle (döngü pürüzsüz olsun) */
+/* 3. Dönüş Animasyonu */
+@keyframes rotate-border {
+    to {
+        --angle: 360deg;
+    }
 }
 
         .card-title { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--black); margin-bottom: 25px; position: relative; display: inline-block; }
