@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sudokai</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23ea1d2c'/></svg>" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Permanent+Marker&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-body: #f8fafc; --primary: #0f172a; --green-text: #15803d; --green-bg: #dcfce7;
@@ -44,30 +45,56 @@
         .daily-text-std { font-size: 0.65rem; font-weight: 800; color: var(--primary); }
         
         .daily-icon { width: 18px; height: 10px; background: transparent; border: 1px solid #fee2e2; border-radius: 20%; display: flex; align-items: center; justify-content: center; }
+        
         @keyframes siren-flash { 
             0% { background-color: #ef4444; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
             50% { background-color: #b91c1c; box-shadow: 0 0 4px 2px rgba(239, 68, 68, 0.3); }
             100% { background-color: #ef4444; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-        .siren-light { width: 8px; height: 8px; border-radius: 50%; animation: siren-flash 1s infinite ease-in-out; }
+        @keyframes siren-flash-green { 
+            0% { background-color: #15803d; box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.7); }
+            50% { background-color: #4ade80; box-shadow: 0 0 4px 2px rgba(21, 128, 61, 0.3); }
+            100% { background-color: #15803d; box-shadow: 0 0 0 0 rgba(21, 128, 61, 0); }
+        }
+        .siren-light { width: 8px; height: 8px; border-radius: 50%; }
+        .siren-light.red { animation: siren-flash 1s infinite ease-in-out; }
+        .siren-light.green { animation: siren-flash-green 1.5s infinite ease-in-out; }
 
-        .status-panel { display: grid; grid-template-columns: 1.4fr 0.7fr 0.7fr 0.7fr 0.7fr; align-items: center; background: #fff; padding: 6px 10px; border-radius: 12px; border: 1px solid var(--border); gap: 4px; flex-shrink: 0; }
+        /* STATUS PANEL (GÜNCELLENDİ) */
+        .status-panel { 
+            display: grid; 
+            /* Sayaç alanını daralttık, diğerlerini büyüttük */
+            grid-template-columns: 1.4fr 0.8fr 0.8fr 0.8fr 0.6fr; 
+            align-items: center; 
+            background: #fff; 
+            padding: 6px 8px; /* Padding optimize edildi */
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            gap: 2px; 
+            flex-shrink: 0; 
+        }
         .user-box { display: flex; flex-direction: column; border-right: 1px solid var(--border); padding-right: 4px; overflow: hidden;}
         .user-name { font-weight: 800; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-rank { font-size: 0.6rem; color: var(--gray); font-weight: 600; display: flex; align-items: center; gap: 3px; }
         .rank-dot { width: 6px; height: 6px; background: var(--green-text); border-radius: 50%; }
+        
         .stat-item { display: flex; flex-direction: column; align-items: center; border-right: 1px solid var(--border); padding: 0 2px; }
         .stat-label { font-size: 0.4rem; font-weight: 700; color: var(--gray); text-transform: uppercase; margin-bottom: 1px; }
-        .level-val { font-size: 0.8rem; font-weight: 800; color: var(--green-text); } .level-total { font-size: 0.6rem; font-weight: 600; color: var(--gray); }
-        .score-val { font-size: 0.8rem; font-weight: 800; color: var(--primary); } .quota-val { font-size: 0.8rem; font-weight: 800; color: var(--red); }
+        /* Fontlar büyütüldü */
+        .level-val { font-size: 0.9rem; font-weight: 800; color: var(--green-text); } 
+        .level-total { font-size: 0.6rem; font-weight: 600; color: var(--gray); }
+        .score-val { font-size: 0.9rem; font-weight: 800; color: var(--primary); } 
+        .quota-val { font-size: 0.9rem; font-weight: 800; color: var(--red); }
+        
         .timer-box { text-align: right; border-left: 1px solid var(--border); padding-left: 4px; }
         .timer-label { font-size: 0.6rem; font-weight: 700; color: var(--primary); display: block; line-height: 1; margin-bottom: 2px;}
         .timer-val { font-size: 0.85rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; color: var(--primary); }
 
         /* --- OYUN ALANI --- */
-        .game-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; position: relative; overflow-y: auto; padding-top: 5px; padding-bottom: 20px; -ms-overflow-style: none; scrollbar-width: none; }
+        .game-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; position: relative; overflow-y: auto; padding-top: 5px; padding-bottom: 5px; -ms-overflow-style: none; scrollbar-width: none; }
         .game-area::-webkit-scrollbar { display: none; }
 
+        /* KURALLAR KUTUSU */
         .rules-container { position: relative; width: 100%; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.3s ease; flex-shrink: 0; z-index: 110; margin-bottom: 0; }
         .rules-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; cursor: pointer; background: #fff; user-select: none; }
         .rules-header:active { background-color: #f8fafc; }
@@ -83,7 +110,12 @@
         .rules-list strong { color: var(--primary); font-weight: 800; }
         .good-luck { margin-top: 8px; font-size: 0.7rem; font-weight: 800; color: var(--red); text-align: right; }
 
-        .top-stats-bar { display: flex; gap: 10px; width: 100%; flex-shrink: 0; margin-top: 10px; margin-bottom: 10px; }
+        /* BUTONLAR (Yeni Yerleşim) */
+        .top-stats-bar { 
+            display: flex; gap: 10px; width: 100%; flex-shrink: 0; 
+            margin-top: 10px; 
+            margin-bottom: 5px; /* Alt boşluk azaltıldı */
+        }
 
         .stat-btn { flex: 1; text-decoration: none; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; color: #000; background: white; padding: 6px 4px; border-radius: 12px; border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; letter-spacing: 0.2px; line-height: 1.1; text-align: center; min-height: 42px; }
         .stat-btn span svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
@@ -91,6 +123,7 @@
         .stat-btn:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
         .icon-trophy { color: var(--red); } .icon-zap { color: var(--red); }
 
+        /* OVERLAYLER */
         .overlay-full { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: none; flex-direction: column; align-items: center; z-index: 100; border-radius: 8px; justify-content: flex-start; padding-top: 60px; gap: 15px; }
         
         #start-overlay { display: flex; justify-content: center; gap: 15px; padding-top: 0; }
@@ -100,24 +133,56 @@
         .start-btn:active { transform: scale(0.95); }
         .start-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; background: #94a3b8; }
         
-        .win-title { font-size: 2rem; font-family: 'Outfit', cursive; color: var(--green-text); margin-bottom: 10px; transform: rotate(-5deg); }
+        .win-title { 
+            font-size: 2.2rem; 
+            font-family: 'Comic Neue', cursive; /* Comic Sans alternatifi modern font */
+            color: var(--green-text); 
+            margin-bottom: 10px; 
+            margin-top: 20px; /* Biraz aşağı alındı */
+            transform: rotate(-3deg); 
+        }
         .win-text { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; text-align: center; line-height: 1.5; white-space: pre-line; }
 
-        .overlay-header { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; text-align: center; }
-        .total-count-text { font-size: 0.75rem; color: var(--gray); font-weight: 600; margin-bottom: 5px; letter-spacing: 0.5px; }
+        /* LİSTE TASARIMI */
+        .overlay-header { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 0px; letter-spacing: 0.5px; text-transform: uppercase; text-align: center; }
         
-        .rank-list { width: 100%; display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; flex-grow: 0; }
+        /* Toplam Oyuncu Sayısı Stili */
+        .total-count-text { 
+            font-size: 0.65rem; 
+            color: var(--red); /* Dikkat çeksin diye kırmızı */
+            font-weight: 700; 
+            margin-bottom: 10px; 
+            letter-spacing: 0.5px; 
+            background: #fff0f5;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+        
+        .rank-list { width: 90%; display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; flex-grow: 0; }
         
         .rank-item { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border); }
         .rank-left { display: flex; align-items: center; gap: 10px; }
         .rank-pos { width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: var(--gray); }
         .rank-pos.gold { background: var(--gold); color: white; } .rank-pos.silver { background: var(--silver); color: white; } .rank-pos.bronze { background: var(--bronze); color: white; }
-        .rank-name { font-size: 0.8rem; font-weight: 700; color: var(--primary); } .rank-score { font-size: 0.8rem; font-weight: 800; color: var(--green-text); }
+        .rank-name { font-size: 0.8rem; font-weight: 700; color: var(--primary); } 
+        .rank-score { font-size: 0.8rem; font-weight: 800; color: var(--green-text); }
         
         .close-overlay-btn { margin-top: 10px; background: transparent; border: 1px solid var(--border); padding: 8px 30px; border-radius: 20px; color: var(--gray); font-weight: 700; font-size: 0.75rem; cursor: pointer; }
 
-        .sudoku-grid { display: grid; grid-template-columns: repeat(9, 1fr); background: var(--primary); gap: 1px; border: 2px solid var(--primary); width: 100%; aspect-ratio: 1/1; max-height: 50vh; flex-shrink: 0; }
-        .cell { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 600; color: var(--primary); cursor: pointer; position: relative; transition: background-color 0.2s; }
+        /* GRID (Güncellendi: %85 Genişlik ve Ortalı) */
+        .sudoku-grid { 
+            display: grid; 
+            grid-template-columns: repeat(9, 1fr); 
+            background: var(--primary); 
+            gap: 1px; 
+            border: 2px solid var(--primary); 
+            width: 85%; /* Daraltıldı */
+            aspect-ratio: 1/1; 
+            /* max-height sınırını kaldırdık, aspect-ratio ile kare kalacak */
+            flex-shrink: 0; 
+            margin: 0 auto; /* Ortalandı */
+        }
+        .cell { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 600; color: var(--primary); cursor: pointer; position: relative; transition: background-color 0.2s; }
         .cell:nth-child(3n) { border-right: 2px solid var(--primary); } .cell:nth-child(9n) { border-right: none; }
         .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--primary); }
         .cell.initial { color: var(--green-text) !important; font-weight: 800; pointer-events: none; } 
@@ -127,13 +192,24 @@
         .cell.error { background-color: var(--error-bg) !important; color: var(--red) !important; animation: shake 0.3s; }
         @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 100% { transform: translateX(0); } }
 
-        .numpad-container { width: 100%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 10px; }
+        /* NUMPAD (Güncellendi: Grid ile aynı genişlik ve yakın) */
+        .numpad-container { 
+            width: 85%; /* Grid ile aynı */
+            display: grid; 
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 6px; 
+            margin: 5px auto 0 auto; /* Üst boşluk 5px, Ortala */
+        }
         .num-btn { height: 38px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; color: var(--primary); cursor: pointer; box-shadow: var(--btn-shadow); transition: all 0.1s ease; position: relative; top: 0; }
         .num-btn:active { top: 3px; box-shadow: var(--btn-active-shadow); }
         .num-btn.eraser { background-color: #f1f5f9; color: var(--gray); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         .num-btn.clear-all { grid-column: span 2; background-color: #fee2e2; color: var(--red); border-color: #fecaca; font-size: 0.7rem; font-weight: 800; }
 
-        .footer { margin-top: auto; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; flex-shrink: 0; }
+        /* FOOTER (Sıkılaştırıldı) */
+        .footer { 
+            margin-top: 5px; /* Numpad ile arasını açma */
+            background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; flex-shrink: 0; 
+        }
         .footer-link { text-decoration: none !important; color: var(--black); font-size: 0.75rem; font-weight: 700; opacity: 0.8; }
         .date-text { font-size: 0.75rem; font-weight: 700; color: var(--gray); opacity: 0.8; cursor: default; }
         .footer-brand { font-size: 0.75rem; font-weight: 700; color: var(--gray); opacity: 0.8; text-decoration: none; cursor: pointer; }
@@ -169,7 +245,7 @@
         <div class="brand-panel">
             <div class="brand-left"><div class="mini-icon"><svg viewBox="0 0 60 60"><line x1="20" y1="0" x2="20" y2="60" class="grid-line" /><line x1="40" y1="0" x2="40" y2="60" class="grid-line" /><line x1="0" y1="20" x2="60" y2="20" class="grid-line" /><line x1="0" y1="40" x2="60" y2="40" class="grid-line" /><rect x="4" y="24" width="12" height="12" class="shape-fill" /><circle cx="50" cy="10" r="6" class="shape-fill" /><polygon points="30,44 24,56 36,56" class="shape-fill" /><text x="10" y="10" class="ghost-num fill-green delay-1">4</text><text x="30" y="10" class="ghost-num fill-red delay-2">9</text><text x="30" y="30" class="ghost-num fill-green delay-3">1</text><text x="50" y="30" class="ghost-num fill-red delay-4">7</text><text x="10" y="50" class="ghost-num fill-red delay-5">5</text><text x="50" y="50" class="ghost-num fill-green delay-2">3</text></svg></div></div>
             <h1 class="mini-logo" onclick="returnToTournament()">sudok<span>ai</span></h1>
-            <div class="brand-right"><div class="daily-challenge-btn" onclick="startDailyGame()"><div class="daily-top-row"><span class="daily-text-std">GÜNÜN</span><div class="daily-icon"><div class="siren-light"></div></div></div><span class="daily-text-std">BULMACASI</span></div></div>
+            <div class="brand-right"><div class="daily-challenge-btn" onclick="startDailyGame()"><div class="daily-top-row"><span class="daily-text-std">GÜNÜN</span><div class="daily-icon"><div id="daily-siren" class="siren-light"></div></div></div><span class="daily-text-std">BULMACASI</span></div></div>
         </div>
 
         <div class="status-panel">
@@ -218,7 +294,7 @@
             <div class="top-stats-bar">
                 <a class="stat-btn trophy" onclick="openLeaderboard()">
                     <span class="icon-trophy"><svg viewBox="0 0 24 24"><path d="M20.2 6.7l-2-2a3 3 0 0 0-4.2 0l-7 7a3 3 0 0 0 0 4.2l2 2a3 3 0 0 0 4.2 0l7-7a3 3 0 0 0 0-4.2zM5 20h14v2H5z"/></svg></span>
-                    TURNUVA GENEL PUAN DURUMU
+                    TURNUVA PUAN DURUMU
                 </a>
                 <a class="stat-btn star" onclick="openDailyWinners()">
                     <span class="icon-zap"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
@@ -230,27 +306,17 @@
             <div id="start-overlay" class="overlay-full" style="display:flex">
                 <div style="font-size:1.5rem; font-weight:800; color:#0f172a; margin-bottom: 10px;">HAZIR MISIN?</div>
                 <button id="main-start-btn" class="start-btn" onclick="forceStartGame()" disabled>SİSTEM YÜKLENİYOR...</button>
-                <div class="top-stats-bar" style="margin-top: 20px; width: 100%;">
-                    <a class="stat-btn trophy" onclick="openLeaderboard()">
-                        <span class="icon-trophy"><svg viewBox="0 0 24 24"><path d="M20.2 6.7l-2-2a3 3 0 0 0-4.2 0l-7 7a3 3 0 0 0 0 4.2l2 2a3 3 0 0 0 4.2 0l7-7a3 3 0 0 0 0-4.2zM5 20h14v2H5z"/></svg></span>
-                        TURNUVA GENEL PUAN DURUMU
-                    </a>
-                    <a class="stat-btn star" onclick="openDailyWinners()">
-                        <span class="icon-zap"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
-                        GÜNÜN BULMACASINI ÇÖZENLER
-                    </a>
-                </div>
             </div>
 
             <div id="win-overlay" class="overlay-full">
-                <div class="win-title">HARiKA! 🎉</div>
+                <div class="win-title">Tebrikler! 🎉</div>
                 <div class="win-text">Bölümü Başarıyla Tamamladın!</div>
-                <button id="win-action-btn" class="start-btn" onclick="nextLevel()">SONRAKİ BÖLÜM ▶</button>
+                <button id="win-action-btn" class="start-btn" onclick="nextLevel()">SIRADAKİ OYUN ▶</button>
             </div>
 
             <div id="leaderboard-overlay" class="overlay-full">
-                <div class="overlay-header">TURNUVA GENEL PUAN DURUMU</div>
-                <div id="total-player-count" class="total-count-text">Yükleniyor...</div>
+                <div class="overlay-header">TURNUVA PUAN DURUMU</div>
+                <div id="total-player-count" class="total-count-text">Toplam Oyuncu: Yükleniyor...</div>
                 
                 <div class="rank-list" id="global-rank-list"></div>
                 <button class="close-overlay-btn" onclick="closeOverlays()">KAPAT</button>
@@ -258,6 +324,7 @@
 
             <div id="daily-winners-overlay" class="overlay-full">
                 <div class="overlay-header">GÜNÜN BULMACASINI ÇÖZENLER</div>
+                <div id="daily-player-count" class="total-count-text">Toplam Çözen: Yükleniyor...</div>
                 <div class="rank-list" id="daily-rank-list"></div>
                 <button class="close-overlay-btn" onclick="closeOverlays()">KAPAT</button>
             </div>
@@ -288,7 +355,7 @@
         </div>
     </div>
 
-    <script type="module" src="app.js?v=final_fix_v20"></script>
+    <script type="module" src="app.js?v=final_fix_v21"></script>
     <script>
         function toggleRules() {
             const container = document.querySelector('.rules-container');

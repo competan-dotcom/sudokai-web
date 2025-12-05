@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v20.0 - RANK & LIST FIX)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v21.0 - LAYOUT & LIST REFACTOR)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -66,17 +66,27 @@ if (userProgress.lastPlayedDate !== new Date().toDateString()) {
 
 // --- RÜTBE (KLASMAN) HESAPLAMA ---
 function getRankTitle(level) {
-    if (level <= 100) return "Çaylak";
-    if (level <= 200) return "Usta";
-    if (level <= 300) return "Mahir";
-    if (level <= 400) return "Üstad";
-    return "Kompetan";
+    if (level <= 100) return "çaylak";
+    if (level <= 200) return "usta";
+    if (level <= 300) return "mahir";
+    if (level <= 400) return "üstad";
+    return "kompetan";
 }
 
 // --- VERİ YÜKLEME VE İLK KURULUM ---
 async function initSystem() {
     // 1. Önce UI'ı güncelle
     updateUI();
+    
+    // Günlük İkon Rengi Ayarla
+    const sirenEl = document.getElementById('daily-siren');
+    if(sirenEl) {
+        if(userProgress.hasPlayedDailyChallenge) {
+            sirenEl.className = 'siren-light red'; // Oynanmışsa kırmızı
+        } else {
+            sirenEl.className = 'siren-light green'; // Oynanmamışsa yeşil
+        }
+    }
     
     // --- İSİM FORMATLAMA ---
     let dispName = userProgress.username;
@@ -136,6 +146,12 @@ async function syncWithCloud() {
             userProgress = cloudData;
             saveProgress(false); 
             updateUI();
+            
+            // İkonu tekrar kontrol et (Cloud'dan true gelmiş olabilir)
+            const sirenEl = document.getElementById('daily-siren');
+            if(sirenEl) {
+                sirenEl.className = userProgress.hasPlayedDailyChallenge ? 'siren-light red' : 'siren-light green';
+            }
             
             // İsim güncellemesi 
             let dispName = userProgress.username;
@@ -429,20 +445,24 @@ async function checkWin() {
             // Firebase'e Rütbe ile Kayıt
             saveScoreToFirebase(userProgress.username, userProgress.score, currentRank);
 
-            winTitle.innerText = "HARİKA! 🎉";
-            winText.innerText = `Puanın: ${userProgress.score}\n(+${totalWin} Puan)`;
-            winBtn.innerText = "SONRAKİ BÖLÜM ▶";
+            winTitle.innerText = "Tebrikler! 🎉";
+            winText.innerText = `Puanın: ${userProgress.score.toLocaleString('tr-TR')}\n(+${totalWin} Puan)`;
+            winBtn.innerText = "SIRADAKİ OYUN ▶";
             winBtn.onclick = window.nextLevel;
 
         } else {
             userProgress.hasPlayedDailyChallenge = true;
+            // İkonu kırmızı yap
+            const sirenEl = document.getElementById('daily-siren');
+            if(sirenEl) sirenEl.className = 'siren-light red';
+
             let timeTaken = 300 - gameData.timer;
             userProgress.dailyBestTime = timeTaken;
 
             // Firebase'e Rütbe ile Kayıt
             saveDailyScoreToFirebase(userProgress.username, timeTaken, currentRank);
 
-            winTitle.innerText = "GÜNÜN ŞAMPİYONU! 🏆";
+            winTitle.innerText = "Tebrikler! 🏆";
             winText.innerText = `Tamamlama Süresi: ${formatTime(timeTaken)}`;
             winBtn.innerText = "TURNUVAYA DÖN ↩";
             winBtn.onclick = window.returnToTournament;
@@ -479,7 +499,7 @@ window.openLeaderboard = async function() {
     gameData.isPaused = true; 
     const list = document.getElementById('global-rank-list');
     const countEl = document.getElementById('total-player-count');
-    if(countEl) countEl.innerText = "";
+    if(countEl) countEl.innerText = "Yükleniyor...";
     
     list.innerHTML = '<div style="text-align:center; padding:10px;">Yükleniyor...</div>';
     document.getElementById('leaderboard-overlay').style.display = 'flex';
@@ -487,6 +507,10 @@ window.openLeaderboard = async function() {
     try {
         const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(20));
         const querySnapshot = await getDocs(q);
+        
+        // TOPLAM OYUNCU SAYISI (Şimdilik listedeki kişi sayısı)
+        if(countEl) countEl.innerText = `Toplam Oyuncu: ${querySnapshot.size}`;
+
         list.innerHTML = ''; 
         let index = 0;
         
@@ -494,7 +518,6 @@ window.openLeaderboard = async function() {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
             
-            // LİSTEDEKİ İSİMLERİ DE FORMATLA + RÜTBE GÖSTER
             let dispName = u.name;
             if (dispName.includes(' ')) {
                 let parts = dispName.split(' ');
@@ -503,8 +526,11 @@ window.openLeaderboard = async function() {
                 dispName = `${dispName} X.`;
             }
             
-            // Eğer veritabanında rank varsa onu da ekle, yoksa varsayılan Çaylak
-            let userRank = u.rank ? ` (${u.rank.toUpperCase()})` : '';
+            // RÜTBE FORMATLAMA (KÜÇÜK HARF ve KIRMIZI)
+            let userRank = u.rank ? ` <span style="color:#ea1d2c; font-weight:700; font-size:0.7rem;">(${u.rank.toLowerCase()})</span>` : '';
+
+            // PUAN FORMATLAMA (BİNLİK AYIRACI + P YOK)
+            let formattedScore = u.score ? u.score.toLocaleString('tr-TR') : 0;
 
             let html = `
                 <div class="rank-item">
@@ -512,7 +538,7 @@ window.openLeaderboard = async function() {
                         <div class="rank-pos ${rankClass}">${index + 1}</div>
                         <div class="rank-name">${dispName.toUpperCase()}${userRank}</div>
                     </div>
-                    <div class="rank-score">${u.score} P</div>
+                    <div class="rank-score">${formattedScore}</div>
                 </div>`;
             list.innerHTML += html;
             index++;
@@ -527,6 +553,9 @@ window.openLeaderboard = async function() {
 window.openDailyWinners = async function() {
     gameData.isPaused = true; 
     const list = document.getElementById('daily-rank-list');
+    const countEl = document.getElementById('daily-player-count');
+    if(countEl) countEl.innerText = "Yükleniyor...";
+
     list.innerHTML = '<div style="text-align:center; padding:10px;">Yükleniyor...</div>';
     document.getElementById('daily-winners-overlay').style.display = 'flex';
     
@@ -536,6 +565,10 @@ window.openDailyWinners = async function() {
     try {
         const q = query(collection(db, collectionName), orderBy("time", "asc"), limit(20));
         const querySnapshot = await getDocs(q);
+        
+        // TOPLAM ÇÖZEN SAYISI
+        if(countEl) countEl.innerText = `Toplam Çözen: ${querySnapshot.size}`;
+
         list.innerHTML = ''; 
         let index = 0;
         
@@ -543,7 +576,6 @@ window.openDailyWinners = async function() {
             let u = doc.data();
             let rankClass = index < 3 ? ['gold','silver','bronze'][index] : '';
             
-            // LİSTEDEKİ İSİMLERİ DE FORMATLA + RÜTBE GÖSTER
             let dispName = u.name;
             if (dispName.includes(' ')) {
                 let parts = dispName.split(' ');
@@ -552,7 +584,7 @@ window.openDailyWinners = async function() {
                 dispName = `${dispName} X.`;
             }
             
-            let userRank = u.rank ? ` (${u.rank.toUpperCase()})` : '';
+            let userRank = u.rank ? ` <span style="color:#ea1d2c; font-weight:700; font-size:0.7rem;">(${u.rank.toLowerCase()})</span>` : '';
 
             let html = `
                 <div class="rank-item">
@@ -580,13 +612,14 @@ window.showSystemAlert = function(title, msg) {
 function updateUI() {
     document.querySelector('.level-val').innerHTML = `${userProgress.level}<span class="level-total">/500</span>`;
     document.querySelector('.quota-val').innerText = `${userProgress.dailyQuota}/20`;
-    document.querySelector('.score-val').innerText = userProgress.score;
+    // PUAN FORMATLAMA
+    document.querySelector('.score-val').innerText = userProgress.score.toLocaleString('tr-TR');
     
-    // RÜTBE GÜNCELLEME
+    // RÜTBE GÜNCELLEME (KÜÇÜK HARF)
     let currentRank = getRankTitle(userProgress.level);
     let rankEl = document.querySelector('.user-rank');
     if(rankEl) {
-        rankEl.innerHTML = `<div class="rank-dot"></div><span>${currentRank}</span>`;
+        rankEl.innerHTML = `<div class="rank-dot"></div><span>${currentRank}</span>`; // Zaten fonksiyondan küçük dönüyor
     }
 }
 
@@ -613,16 +646,12 @@ function formatTime(seconds) {
     return `${m}:${s}`;
 }
 
-// --- FIREBASE LİDERLİK TABLOSU KAYITLARI (GÜNCELLENDİ: ARTIK E-MAİL BAZLI KAYDEDİYOR) ---
+// --- FIREBASE LİDERLİK TABLOSU KAYITLARI ---
 async function saveScoreToFirebase(name, score, rank) {
     try {
-        // ESKİSİ: const userRef = doc(db, "leaderboard", name); 
-        // YENİSİ: Dosya ismi olarak 'name' değil 'email' kullanıyoruz ki çakışmasın.
         const docId = userProgress.email ? userProgress.email : name;
-        
         const userRef = doc(db, "leaderboard", docId);
         
-        // İçerik olarak 'name' gönderiyoruz ki listede email yerine isim yazsın.
         await setDoc(userRef, { name: name, score: score, rank: rank, lastUpdate: new Date() }, { merge: true });
     } catch (e) { console.error("Skor hatası", e); }
 }
@@ -631,8 +660,6 @@ async function saveDailyScoreToFirebase(name, timeSeconds, rank) {
     try {
         const today = new Date().toISOString().slice(0,10);
         const collectionName = "daily_winners_" + today;
-        
-        // BURADA DA E-MAİL KULLANIYORUZ
         const docId = userProgress.email ? userProgress.email : name;
         
         const userRef = doc(db, collectionName, docId);
