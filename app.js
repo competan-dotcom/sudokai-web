@@ -1,5 +1,5 @@
 // ==========================================
-// 🧠 SUDOKAI BEYİN MERKEZİ (v23.0 - FORCE UPDATE)
+// 🧠 SUDOKAI BEYİN MERKEZİ (v27.0 - MULTI BACKUP & LOOP SAFE)
 // ==========================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -77,6 +77,7 @@ function getRankTitle(level) {
 async function initSystem() {
     updateUI();
     
+    // Günlük İkon Rengi Ayarla
     const sirenEl = document.getElementById('daily-siren');
     if(sirenEl) {
         if(userProgress.hasPlayedDailyChallenge) {
@@ -106,13 +107,18 @@ async function initSystem() {
         btn.innerText = "VERİLER EŞİTLENİYOR...";
     }
 
+    // 2. BULUT SENKRONİZASYONU
     if (userProgress.email) {
         await syncWithCloud();
     }
 
+    // 3. Bulmacaları Yükle
     await loadPuzzles();
+
+    // 4. Oyunu Hazırla
     prepareNextGame('tournament');
     
+    // 5. Butonu Aç
     if(btn) {
         btn.disabled = false;
         btn.innerText = "OYUNA BAŞLA ▶";
@@ -168,24 +174,31 @@ async function loadPuzzles() {
         const res = await fetch('tum_bulmacalar_SIRALI.json');
         if (res.ok) {
             const data = await res.json();
+            // Verileri havuza doldur
             if(data.tier_1) gameData.allPuzzles.push(...data.tier_1);
             if(data.tier_2) gameData.allPuzzles.push(...data.tier_2);
             if(data.tier_3) gameData.allPuzzles.push(...data.tier_3);
             if(data.tier_4) gameData.allPuzzles.push(...data.tier_4);
             if(data.tier_5) gameData.allPuzzles.push(...data.tier_5);
             
+            // Zorları ayır
             if(data.tier_4) gameData.hardPuzzles.push(...data.tier_4);
             if(data.tier_5) gameData.hardPuzzles.push(...data.tier_5);
+            
+            console.log("🧩 Bulmacalar başarıyla yüklendi. Adet:", gameData.allPuzzles.length);
         } else {
             throw new Error("JSON hatası");
         }
     } catch (e) {
-        console.warn("⚠️ Veri yüklenemedi, yedekler devrede.");
-        gameData.allPuzzles = [getBackupPuzzle(), getBackupPuzzle()];
-        gameData.hardPuzzles = [getBackupPuzzle()];
+        console.warn("⚠️ Veri yüklenemedi, ACİL DURUM YEDEKLERİ devrede.");
+        // JSON Okunamazsa 5 tane farklı yedek bulmacayı yükle
+        const backups = getBackupPuzzlesList();
+        gameData.allPuzzles = [...backups]; // Turnuva için yedekler
+        gameData.hardPuzzles = [...backups]; // Günlük için yedekler
     }
 }
 
+// --- OYUN HAZIRLIK (ARKAPLAN) ---
 function prepareNextGame(mode) {
     gameData.mode = mode;
     gameData.timer = 300; 
@@ -200,10 +213,13 @@ function prepareNextGame(mode) {
             const dateString = `${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}`;
             let hash = 0;
             for (let i = 0; i < dateString.length; i++) hash = ((hash << 5) - hash) + dateString.charCodeAt(i) | 0;
+            
+            // MODÜLO (%): Listede kaç soru varsa ona göre kalanı alır, asla taşmaz.
             const uniqueIndex = Math.abs(hash) % gameData.hardPuzzles.length;
             puzzleToLoad = gameData.hardPuzzles[uniqueIndex];
         } else {
-            puzzleToLoad = getBackupPuzzle();
+            // Eğer hardPuzzles boşsa (çok düşük ihtimal), ilk yedeği al
+            puzzleToLoad = getBackupPuzzlesList()[0];
         }
         const startTitle = document.querySelector('#start-overlay div');
         if(startTitle) startTitle.innerText = "GÜNÜN BULMACASI";
@@ -212,10 +228,11 @@ function prepareNextGame(mode) {
 
     } else {
         if (gameData.allPuzzles.length > 0) {
+            // MODÜLO (%): Level 501 olursan, (501-1) % 500 = 0 olur. Yani başa döner. Çakılmaz.
             let idx = (userProgress.level - 1) % gameData.allPuzzles.length;
             puzzleToLoad = gameData.allPuzzles[idx];
         } else {
-            puzzleToLoad = getBackupPuzzle();
+            puzzleToLoad = getBackupPuzzlesList()[0];
         }
         const startTitle = document.querySelector('#start-overlay div');
         if(startTitle) startTitle.innerText = "HAZIR MISIN?";
@@ -251,6 +268,8 @@ function renderBoard(data) {
     }
     checkGroups();
 }
+
+// --- KULLANICI ETKİLEŞİMLERİ ---
 
 window.forceStartGame = function() {
     if (gameData.mode === 'tournament' && userProgress.dailyQuota <= 0) {
@@ -296,6 +315,8 @@ window.nextLevel = function() {
     prepareNextGame('tournament');
     document.getElementById('start-overlay').style.display = 'flex';
 };
+
+// --- OYUN MANTIĞI ---
 
 function selectGameCell(cell) {
     if (!gameData.isPlaying || gameData.isPaused) return;
@@ -492,7 +513,6 @@ window.openLeaderboard = async function() {
                 dispName = `${dispName} X.`;
             }
             
-            // RÜTBE FORMATI
             let userRank = u.rank ? ` <span style="color:#ea1d2c; font-weight:700; font-size:0.7rem;">(${u.rank.toLowerCase()})</span>` : '';
             let formattedScore = u.score ? u.score.toLocaleString('tr-TR') : 0;
 
@@ -574,11 +594,9 @@ function updateUI() {
     document.querySelector('.quota-val').innerText = `${userProgress.dailyQuota}/20`;
     document.querySelector('.score-val').innerText = userProgress.score.toLocaleString('tr-TR');
     
-    // RÜTBE GÜNCELLEME (Üst Panel)
     let currentRank = getRankTitle(userProgress.level);
     let rankEl = document.querySelector('.user-rank');
     if(rankEl) {
-        // Burada da kırmızı ve küçük harf olacak
         rankEl.innerHTML = `<span style="color:#ea1d2c; font-weight:800; font-size:0.6rem;">(${currentRank.toLowerCase()})</span>`;
     }
 }
@@ -590,8 +608,15 @@ async function saveProgress(forceCloud = false) {
     }
 }
 
-function getBackupPuzzle() {
-    return { puzzle: ".4..............3.......97....7...4.....8........2....52.816.9.739245186816......", solution: "348697512297158634165432978952761843471583269683924751524816397739245186816379425" };
+// --- GÜÇLENDİRİLMİŞ YEDEK LİSTESİ ---
+function getBackupPuzzlesList() {
+    return [
+        { puzzle: ".4..............3.......97....7...4.....8........2....52.816.9.739245186816......", solution: "348697512297158634165432978952761843471583269683924751524816397739245186816379425" },
+        { puzzle: "000000012000035000000600070700000300000400800100000000000120000080000400050000600", solution: "673849512912735648548612973796254381325491867184376259869123754287569431451987623" },
+        { puzzle: "020608000580009700000040000370000500600000004008000013000020000009800036000306090", solution: "123678945584219763967543128372196584695438271418752639731925486249861357856347192" },
+        { puzzle: "000000000000003085001020000000507000004000100090000000500000073002010000000040009", solution: "987654321246173985351928746128537694634892157795461832519286473472319568863745219" },
+        { puzzle: "300200000000107000706030500070009080900020005010080090002060807000409000000008006", solution: "385294671249157389716834529473569182968721435512386794152963847638479215894158276" }
+    ];
 }
 
 function formatTime(seconds) {
