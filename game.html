@@ -49,7 +49,7 @@
         /* Yüksekliği sabitlemek yerine padding verelim, rahatlasın */
         height: auto; 
         padding: 5px 0; /* Üstten alttan 5px boşluk */
-        border-bottom: 1px solid rgba(0,0,0,0.05); 
+        border-bottom: 0px solid rgba(0,0,0,0.05); 
         flex-shrink: 0;
         }
 
@@ -80,7 +80,20 @@
         } 
         .mini-logo span { color: var(--red); }
         
-        .daily-challenge-btn { display: flex; flex-direction: column; align-items: flex-end; cursor: pointer; }
+        .daily-challenge-btn { 
+        display: flex; 
+        flex-direction: column; 
+        align-items: flex-end; 
+        cursor: pointer;
+        /* --- İNCE AYAR KODLARI BURADA --- */
+        /* 1. Satır Aralığı (Sıkılaştırmak için) */
+        line-height: 0.9; 
+        gap: 0px; /* Satırlar arası boşluk */
+        /* 2. Yukarı/Aşağı Kaydırma (Manuel Ayar) */
+        position: relative; 
+        top: 5px; /* <-- BURAYLA OYNA: */
+        }
+
         .daily-top-row { display: flex; align-items: center; gap: 8px; }
         .daily-text-std { font-size: 0.75rem; font-weight: 800; color: #3a7209; }
         .daily-icon { width: 16px; height: 9px; background: transparent; border: 0.1px solid #fee2e2; border-radius: 20%; display: flex; align-items: center; justify-content: center; }
@@ -236,7 +249,7 @@
         font-weight: 800; 
         text-transform: uppercase; 
         color: #ad4b0d; 
-        background: white; 
+        background: rgb(243, 235, 235); 
         padding: 5px 8px; 
         border-radius: 10px; 
         border: 1px solid var(--border); 
