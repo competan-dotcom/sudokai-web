@@ -21,7 +21,47 @@
         .slogan-container { width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 10px; gap: 10px; }
         .main-slogan-text { color: #1e293b; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .sub-slogan-text { color: #64748b; font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 500; text-align: center; }
-        .login-card { background: white; border-radius: 28px; padding: 40px 35px; text-align: center; box-shadow: var(--card-shadow); border: 1px solid #f1f5f9; }
+        
+        /* 1. KUTU AYARLARI (GÜNCELLENDİ) */
+.login-card { 
+    background: white; 
+    border-radius: 28px; 
+    padding: 40px 35px; 
+    text-align: center; 
+    box-shadow: var(--card-shadow); 
+    border: 1px solid #f1f5f9;
+    
+    /* Işık efekti için zorunlu eklemeler: */
+    position: relative; 
+    overflow: hidden; 
+}
+
+/* 2. PROJEKTÖR IŞIK EFEKTİ (YENİ) */
+.login-card::after {
+    content: '';
+    position: absolute;
+    top: 0;       /* En üstte duracak */
+    left: -100%;  /* Başlangıçta solda gizli */
+    width: 100%;
+    height: 4px;  /* Işığın kalınlığı */
+    
+    /* Kırmızı neon gradient */
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    
+    /* Aşağıya süzülen kırmızı yansıma (Glow) */
+    box-shadow: 0 5px 15px rgba(234, 29, 44, 0.6);
+    
+    /* Animasyon döngüsü */
+    animation: projector-scan 3.5s infinite ease-in-out;
+}
+
+/* 3. ANİMASYON KEYFRAMES (YENİ) */
+@keyframes projector-scan {
+    0% { left: -100%; }      /* Ekranın solundan gir */
+    50% { left: 100%; }      /* Sağa kadar git */
+    100% { left: 100%; }     /* Biraz bekle (döngü pürüzsüz olsun) */
+}
+
         .card-title { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--black); margin-bottom: 25px; position: relative; display: inline-block; }
         .card-title::after { content: ''; display: block; width: 60%; height: 4px; background: var(--red); margin: 4px auto 0 auto; border-radius: 2px; opacity: 0.9; }
         .google-btn { width: 100%; background: white; border: 2px solid #e2e8f0; border-radius: 16px; padding: 18px; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: all 0.2s ease; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--black); box-shadow: 0 4px 6px rgba(0,0,0,0.02); text-decoration: none; }
