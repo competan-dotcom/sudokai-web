@@ -42,10 +42,20 @@
         /* --- ÜST BLOKLAR (SABİT) --- */
         .fixed-header-group { flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; }
 
-        .brand-panel { display: flex; align-items: center; justify-content: space-between; height: 50px; }
+        .brand-panel { 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between; 
+        /* Yüksekliği sabitlemek yerine padding verelim, rahatlasın */
+        height: auto; 
+        padding: 5px 0; /* Üstten alttan 5px boşluk */
+        border-bottom: 1px solid rgba(0,0,0,0.05); 
+        flex-shrink: 0;
+        }
+
         .brand-left { width: 80px; } 
-        .mini-icon { display: flex; align-items: center; padding-left: 6px; }
-        .mini-icon svg { width: 34px; height: 34px; overflow: visible; }
+        .mini-icon { display: flex; align-items: center; padding-left: 9px; }
+        .mini-icon svg { width: 50px; height: 50px; overflow: visible; }
         .brand-right { width: 80px; display: flex; justify-content: flex-end; }
         .grid-line { stroke: #000; stroke-width: 2; stroke-linecap: square; } .shape-fill { fill: #000; }
         .ghost-num { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 10px; text-anchor: middle; dominant-baseline: central; opacity: 0; animation: twinkle 3s infinite ease-in-out; }
@@ -53,7 +63,21 @@
         .delay-1 { animation-delay: 0s; } .delay-2 { animation-delay: 1.5s; } .delay-3 { animation-delay: 0.5s; } .delay-4 { animation-delay: 2.2s; } .delay-5 { animation-delay: 1s; }
         @keyframes twinkle { 0% { opacity: 0; } 20% { opacity: 1; } 40% { opacity: 0; } 100% { opacity: 0; } }
         
-        .mini-logo { font-family: 'Permanent Marker', cursive; font-size: 3.2rem; margin: 0; color: #000; letter-spacing: 1px; cursor: pointer; } 
+        .mini-logo { 
+        font-family: 'Permanent Marker', cursive; 
+        font-size: 3rem; 
+        color: #000; 
+        letter-spacing: 1px; 
+        cursor: pointer; 
+    
+        /* YENİ AYARLAR: */
+        margin: 0; 
+        line-height: 0.8; /* Satır aralığını kısarak fontun boşluğunu al */
+    
+        /* Font aşağı basık duruyorsa, bunu eksi (-) değer vererek yukarı çekersin */
+        position: relative;
+        top: -2px; /* Göz kararı yukarı itme payı */
+        } 
         .mini-logo span { color: var(--red); }
         
         .daily-challenge-btn { display: flex; flex-direction: column; align-items: flex-end; cursor: pointer; }
@@ -338,8 +362,33 @@
         .overlay-header { font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-bottom: 0px; letter-spacing: 0.5px; text-transform: uppercase; text-align: center; }
         .total-count-text { font-size: 0.65rem; color: var(--red); font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px; background: #fff0f5; padding: 4px 12px; border-radius: 12px; }
         
-        .rank-list { width: 90%; display: flex; flex-direction: column; gap: 8px; max-height: 55vh; overflow-y: auto; flex-grow: 0; }
-        .rank-item { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border); }
+        
+        .rank-list { 
+        width: 95%; /* Daha geniş, kenarlara yakın */
+        display: flex; 
+        flex-direction: column; 
+        gap: 0; /* Aradaki boşluğu sıfırladık, çizgilerle ayıracağız */
+        max-height: 55vh; /* Burası dolunca scroll açılır */
+        overflow-y: auto; 
+        flex-grow: 0; 
+        margin-top: 10px;
+        }
+
+        .rank-item { 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between; 
+        background: transparent; /* Arkaplan şeffaf/beyaz */
+        padding: 10px 5px; /* Dikeyde ferah ama çok açık değil */
+        border-radius: 0; /* Köşeler sivri */
+        border: none; /* Çerçeve yok */
+        border-bottom: 1px solid #f1f5f9; /* Sadece alt çizgi (modern görünüm) */
+        }
+        /* Listenin son elemanının altındaki çizgiyi sil */
+        .rank-item:last-child { 
+        border-bottom: none; 
+        }
+
         .rank-left { display: flex; align-items: center; gap: 10px; }
         .rank-pos { width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: var(--gray); }
         .rank-pos.gold { background: var(--gold); color: white; } .rank-pos.silver { background: var(--silver); color: white; } .rank-pos.bronze { background: var(--bronze); color: white; }
@@ -423,7 +472,7 @@
             <div class="top-stats-bar">
                 <a class="stat-btn trophy" onclick="openLeaderboard()">
                     <span class="icon-trophy"><svg viewBox="0 0 24 24"><path d="M20.2 6.7l-2-2a3 3 0 0 0-4.2 0l-7 7a3 3 0 0 0 0 4.2l2 2a3 3 0 0 0 4.2 0l7-7a3 3 0 0 0 0-4.2zM5 20h14v2H5z"/></svg></span>
-                    Turnuva Genel Puan Durumu
+                    Turnuva Puan Durumu
                 </a>
                 <a class="stat-btn star" onclick="openDailyWinners()">
                     <span class="icon-zap"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
@@ -446,7 +495,7 @@
             </div>
 
             <div id="leaderboard-overlay" class="overlay-full">
-                <div class="overlay-header">Turnuva Genel Puan Durumu</div>
+                <div class="overlay-header">Turnuva Puan Durumu</div>
                 <div id="total-player-count" class="total-count-text">Toplam Oyuncu: Yükleniyor...</div>
                 <div class="rank-list" id="global-rank-list"></div>
                 <button class="close-overlay-btn" onclick="closeOverlays()">KAPAT</button>
