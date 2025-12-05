@@ -28,7 +28,7 @@
             display: flex; flex-direction: column; 
             padding: max(10px, env(safe-area-inset-top)) 16px max(5px, env(safe-area-inset-bottom)) 16px;
             position: relative; background: transparent;
-            gap: 20px;
+            gap: 15px;
         }
 
         @media (min-width: 450px) {
@@ -44,7 +44,7 @@
 
         .brand-panel { display: flex; align-items: center; justify-content: space-between; height: 50px; }
         .brand-left { width: 80px; } 
-        .mini-icon { display: flex; align-items: center; padding-left: 3px; }
+        .mini-icon { display: flex; align-items: center; padding-left: 6px; }
         .mini-icon svg { width: 34px; height: 34px; overflow: visible; }
         .brand-right { width: 80px; display: flex; justify-content: flex-end; }
         .grid-line { stroke: #000; stroke-width: 2; stroke-linecap: square; } .shape-fill { fill: #000; }
@@ -58,7 +58,7 @@
         
         .daily-challenge-btn { display: flex; flex-direction: column; align-items: flex-end; cursor: pointer; }
         .daily-top-row { display: flex; align-items: center; gap: 3px; }
-        .daily-text-std { font-size: 0.6rem; font-weight: 800; color: var(--primary); }
+        .daily-text-std { font-size: 0.75rem; font-weight: 800; color: var(--primary); }
         .daily-icon { width: 16px; height: 9px; background: transparent; border: 1px solid #fee2e2; border-radius: 20%; display: flex; align-items: center; justify-content: center; }
         
         @keyframes siren-flash { 0% { background-color: #ef4444; } 50% { background-color: #b91c1c; box-shadow: 0 0 4px 2px rgba(239, 68, 68, 0.3); } 100% { background-color: #ef4444; } }
@@ -149,7 +149,7 @@
     }
 
     .stat-label { 
-    font-size: 0.4rem; /* Okunurluk için tık büyüdü */
+    font-size: 0.55rem; /* Okunurluk için tık büyüdü */
     font-weight: 700; 
     color: #94a3b8; /* Daha soft gri */
     text-transform: uppercase; 
@@ -159,7 +159,7 @@
 
     /* Değerler (Value) - Daha Okunur */
     .level-val { font-size: 0.85rem; font-weight: 800; color: var(--green-text); line-height: 1; } 
-    .level-total { font-size: 0.6rem; font-weight: 600; color: var(--gray); }
+    .level-total { font-size: 0.85rem; font-weight: 800; color: var(--gray); }
     .score-val { font-size: 0.85rem; font-weight: 800; color: var(--primary); line-height: 1; } 
     .quota-val { font-size: 0.85rem; font-weight: 800; color: var(--red); line-height: 1; }
 
@@ -202,7 +202,7 @@
             flex: 1; 
             text-decoration: none; 
             /* FONT BÜYÜTÜLDÜ */
-            font-size: 0.75rem; 
+            font-size: 0.66rem; 
             font-weight: 800; 
             text-transform: uppercase; 
             color: #000; 
@@ -244,7 +244,7 @@
                 gap: 2vh; 
 
                 /* 2. ADIM: Şimdi buraya istediğin boşluğu yaz */
-                padding-top: 20px;  /* <-- BURAYLA OYNA (Artırdıkça aşağı iner) */
+                padding-top: 15px;  /* <-- BURAYLA OYNA (Artırdıkça aşağı iner) */
                 }
 
         /* GRID (%92 GENİŞLETİLDİ) */
@@ -374,20 +374,20 @@
             </div>
 
             <div class="stat-item">
-            <span class="stat-label">SIRA</span>
+            <span class="stat-label">OYUN NO</span>
             <div class="level-val">1<span class="level-total">/500</span></div>
             </div>
             <div class="stat-item">
-            <span class="stat-label">PUAN</span>
+            <span class="stat-label">TOPLAM PUAN</span>
             <span class="score-val">0</span>
             </div>
             <div class="stat-item" style="border:none">
-            <span class="stat-label">KOTA</span>
+            <span class="stat-label">GÜNLÜK KOTA</span>
             <div class="quota-val">20/20</div>
             </div>
 
             <div class="timer-box">
-            <span class="timer-label">SÜRE</span>
+            <span class="timer-label">SAYAÇ</span>
             <div class="timer-val">05:00</div>
             </div>
             </div>
