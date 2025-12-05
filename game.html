@@ -28,7 +28,7 @@
             display: flex; flex-direction: column; 
             padding: max(10px, env(safe-area-inset-top)) 16px max(5px, env(safe-area-inset-bottom)) 16px;
             position: relative; background: transparent;
-            gap: 15px;
+            gap: 12px;
         }
 
         @media (min-width: 450px) {
@@ -57,13 +57,13 @@
         .mini-logo span { color: var(--red); }
         
         .daily-challenge-btn { display: flex; flex-direction: column; align-items: flex-end; cursor: pointer; }
-        .daily-top-row { display: flex; align-items: center; gap: 3px; }
-        .daily-text-std { font-size: 0.75rem; font-weight: 800; color: var(--primary); }
+        .daily-top-row { display: flex; align-items: center; gap: 7px; }
+        .daily-text-std { font-size: 0.7rem; font-weight: 800; color: var(--primary); }
         .daily-icon { width: 16px; height: 9px; background: transparent; border: 1px solid #fee2e2; border-radius: 20%; display: flex; align-items: center; justify-content: center; }
         
         @keyframes siren-flash { 0% { background-color: #ef4444; } 50% { background-color: #b91c1c; box-shadow: 0 0 4px 2px rgba(239, 68, 68, 0.3); } 100% { background-color: #ef4444; } }
         @keyframes siren-flash-green { 0% { background-color: #15803d; } 50% { background-color: #4ade80; box-shadow: 0 0 4px 2px rgba(21, 128, 61, 0.3); } 100% { background-color: #15803d; } }
-        .siren-light { width: 6px; height: 6px; border-radius: 50%; }
+        .siren-light { width: 7px; height: 7px; border-radius: 50%; }
         .siren-light.red { animation: siren-flash 1s infinite ease-in-out; }
         .siren-light.green { animation: siren-flash-green 1.5s infinite ease-in-out; }
 
@@ -149,7 +149,7 @@
     }
 
     .stat-label { 
-    font-size: 0.55rem; /* Okunurluk için tık büyüdü */
+    font-size: 0.5rem; /* Okunurluk için tık büyüdü */
     font-weight: 700; 
     color: #94a3b8; /* Daha soft gri */
     text-transform: uppercase; 
@@ -171,7 +171,7 @@
     border-left: 1px solid #f1f5f9; 
     padding-left: 6px; 
     }
-    .timer-label { font-size: 0.4rem; font-weight: 700; color: var(--primary); margin-bottom: 2px; }
+    .timer-label { font-size: 0.5rem; font-weight: 700; color: var(--primary); margin-bottom: 2px; }
     .timer-val { font-size: 0.85rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; color: var(--primary); }
 
 
@@ -199,7 +199,7 @@
         .top-stats-bar { display: flex; gap: 8px; width: 100%; }
         
         .stat-btn { 
-            flex: 1; 
+            width: 100px;; 
             text-decoration: none; 
             /* FONT BÜYÜTÜLDÜ */
             font-size: 0.66rem; 
@@ -244,7 +244,7 @@
                 gap: 2vh; 
 
                 /* 2. ADIM: Şimdi buraya istediğin boşluğu yaz */
-                padding-top: 15px;  /* <-- BURAYLA OYNA (Artırdıkça aşağı iner) */
+                padding-top: 12px;  /* <-- BURAYLA OYNA (Artırdıkça aşağı iner) */
                 }
 
         /* GRID (%92 GENİŞLETİLDİ) */
