@@ -510,15 +510,26 @@ async function checkWin() {
     }
 }
 
-window.resetBoard = function() {
-    if(!confirm("Tüm hamleleri silmek istediğine emin misin?")) return;
+    window.resetBoard = function() {
+    // ARTIK SORU SORMAK YOK! Direkt siliyoruz.
+    // if(!confirm("...")) return;  <-- Bu satır tarihe karıştı.
+
     document.querySelectorAll('.cell:not(.initial)').forEach(c => {
         c.innerText = '';
         c.className = 'cell'; 
         c.classList.remove('error', 'correct', 'selected', 'related');
     });
-    checkGroups();
+    
+    // Hücre seçimini de kaldıralım ki temiz görünsün
+    if(selectedCell) {
+        selectedCell.classList.remove('selected');
+        selectedCell = null;
+        document.querySelectorAll('.cell').forEach(c => c.classList.remove('related'));
+    }
+    
+    checkGroups(); // Hataları/Renkleri güncelle
 };
+
 
 window.closeOverlays = function() {
     document.querySelectorAll('.overlay-full').forEach(el => el.style.display = 'none');
@@ -731,3 +742,22 @@ async function saveDailyScoreToFirebase(name, timeSeconds, rank) {
 }
 
 window.onload = initSystem;
+
+
+
+
+window.toggleAIInfo = function() {
+    const box = document.getElementById('ai-info-popup');
+    if (box.style.display === 'flex') {
+        box.style.display = 'none';
+    } else {
+        // Diğer pencereler açıksa kapatalım, ortalık karışmasın
+        window.closeOverlays(); 
+        box.style.display = 'flex';
+        
+        // 5 saniye sonra otomatik kapansın (kullanıcı unutursa diye)
+        setTimeout(() => {
+            box.style.display = 'none';
+        }, 5000);
+    }
+};
