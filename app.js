@@ -552,7 +552,7 @@ window.openLeaderboard = async function() {
     try {
         const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(20));
         const querySnapshot = await getDocs(q);
-        if(countEl) countEl.innerText = `Toplam Oyuncu: ${querySnapshot.size}`;
+        if(countEl) countEl.innerText = `Toplam Üye Sayısı: ${querySnapshot.size}`;
 
         list.innerHTML = ''; 
         let index = 0;

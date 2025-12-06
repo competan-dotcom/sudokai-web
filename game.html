@@ -402,7 +402,7 @@
         align-items: center; 
         justify-content: space-between; 
         background: transparent; /* Arkaplan şeffaf/beyaz */
-        padding: 5px 3px; /* Dikeyde ferah ama çok açık değil */
+        padding: 4px 2px; /* Dikeyde ferah ama çok açık değil */
         border-radius: 0; /* Köşeler sivri */
         border: none; /* Çerçeve yok */
         border-bottom: 0.3px solid #f1f5f9; /* Sadece alt çizgi (modern görünüm) */
@@ -415,8 +415,8 @@
         .rank-left { display: flex; align-items: center; gap: 10px; }
         .rank-pos { width: 18px; height: 18px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 600; color: var(--gray); }
         .rank-pos.gold { background: var(--gold); color: white; } .rank-pos.silver { background: var(--silver); color: white; } .rank-pos.bronze { background: var(--bronze); color: white; }
-        .rank-name { font-size: 0.65rem; font-weight: 600; color: var(--primary); } 
-        .rank-score { font-size: 0.65rem; font-weight: 600; color: var(--green-text); }
+        .rank-name { font-size: 0.75rem; font-weight: 700; color: var(--primary); } 
+        .rank-score { font-size: 0.75rem; font-weight: 700; color: var(--green-text); }
         .close-overlay-btn { margin-top: 10px; background: transparent; border: 1px solid var(--border); padding: 8px 30px; border-radius: 20px; color: var(--gray); font-weight: 700; font-size: 0.75rem; cursor: pointer; }
 
         #custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
@@ -465,7 +465,7 @@
             </div>
 
             <div class="timer-box">
-            <span class="timer-label">SAYAÇ</span>
+            <span class="timer-label">SAYAÇ 300sn</span>
             <div class="timer-val">05:00</div>
             </div>
             </div>
@@ -519,7 +519,7 @@
 
             <div id="leaderboard-overlay" class="overlay-full">
                 <div class="overlay-header">Turnuva Puan Durumu</div>
-                <div id="total-player-count" class="total-count-text">Toplam Oyuncu: Yükleniyor...</div>
+                <div id="total-player-count" class="total-count-text">Toplam Üye Sayısı: Yükleniyor...</div>
                 <div class="rank-list" id="global-rank-list"></div>
                 <button class="close-overlay-btn" onclick="closeOverlays()">KAPAT</button>
             </div>
