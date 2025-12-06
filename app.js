@@ -500,7 +500,7 @@ async function checkWin() {
 
             winTitle.innerText = "Tebrikler! 🏆";
             winText.innerText = `Tamamlama Süresi: ${formatTime(timeTaken)}`;
-            winBtn.innerText = "TURNUVAYA DÖN ↩";
+            winBtn.innerText = "TURNUVAYA DÖN";
             winBtn.onclick = window.returnToTournament;
         }
 
